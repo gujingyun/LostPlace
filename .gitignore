@@ -1,0 +1,56 @@
+# UE5: 忽略中间文件、编译结果、缓存、临时目录
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vscode/
+.vs/
+*.VC.db
+*.VC.VC.opendb
+
+# UE项目生成的构建缓存
+*.opensdf
+*.sdf
+*.suo
+*.log
+*.user
+*.userprefs
+*.db
+*.ipch
+*.pch
+*.obj
+*.pdb
+*.exe
+*.dll
+*.app
+*.dSYM/
+*.xcworkspace
+*.xcuserstate
+
+# 构建结果目录
+Build/
+
+# 忽略某些插件文件夹
+Plugins/*/Intermediate/
+Plugins/*/Binaries/
+Plugins/*/Saved/
+
+# MacOS/Linux
+.DS_Store
+*.swp
+*.swo
+
+# Windows 资源管理器缩略图缓存
+Thumbs.db
+ehthumbs.db
+
+# 打包产物（可选忽略）
+Package/
+*.pak
+*.ucas
+*.utoc
+
+# 日志文件
+*.log
+*.tlog
+*.tmp
