@@ -25,7 +25,7 @@ public:
 	TSubclassOf<AProjectile> ProjectileClass;
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag);
+	void SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag, const bool bOverridePitch = false, const float PitchOverride = 0.f);
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 

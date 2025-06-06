@@ -79,4 +79,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FTaggedMontage GetTaggedMontageByTag(const FGameplayTag& MontageTag); //通过标签获取对应的结构体
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetMinionCount(); //获取角色拥有的仆从数量
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void IncrementMinionCount(const int32 Amount); //设置角色仆从的增长数量，负数为负增长
+	
 };

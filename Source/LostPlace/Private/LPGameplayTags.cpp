@@ -217,6 +217,12 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			FName("Abilities.Attack"),
 			FString("攻击能力标签")
 		);
+	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get()
+	.AddNativeGameplayTag(
+		FName("Abilities.Summon"),
+		FString("召唤技能标签")
+		);
+
 	/*
 	* Montage
 	*/

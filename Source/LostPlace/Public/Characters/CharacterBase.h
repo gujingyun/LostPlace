@@ -40,6 +40,10 @@ public:
 	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	virtual FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
 
+	virtual int32 GetMinionCount_Implementation() override; //获取等级
+
+	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
+
 	/* ICombatInterface战斗接口 结束 */
 	
 	UPROPERTY(BlueprintReadOnly) //蓝图可读
@@ -73,6 +77,9 @@ protected:
 	FName TailSocketName;
 	
 	bool bDead = false; //是否死亡
+
+
+
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -116,6 +123,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="战斗")
 	USoundBase* DeathSound; //死亡音效
+
+	UPROPERTY(BlueprintReadOnly, Category="战斗")
+	int32 MinionsCount = 0; //仆从数量
 
 	
 public:

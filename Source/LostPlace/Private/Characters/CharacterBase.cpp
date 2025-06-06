@@ -186,6 +186,16 @@ FTaggedMontage ACharacterBase::GetTaggedMontageByTag_Implementation(const FGamep
 	return FTaggedMontage();
 }
 
+int32 ACharacterBase::GetMinionCount_Implementation()
+{
+	return MinionsCount;
+}
+
+void ACharacterBase::IncrementMinionCount_Implementation(const int32 Amount)
+{
+	MinionsCount+=Amount;
+}
+
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)
 {

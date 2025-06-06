@@ -15,7 +15,7 @@ void ULPProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 }
-void ULPProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag)
+void ULPProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag, const bool bOverridePitch, const float PitchOverride)
 {
 	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority(); //判断此函数是否在服务器运行
 	if (!bIsServer) return;
@@ -23,7 +23,10 @@ void ULPProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation
 	FTransform SpawnTransform;
 	const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(),SocketTag);
 	FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation(); //将方向转为旋转
-	// Rotation.Pitch = 0.f; //设置Pitch为0，转向的朝向将平行于地面
+	if(bOverridePitch)
+	{
+		Rotation.Pitch = PitchOverride; //覆写发射角度
+	}
 
 	
 	SpawnTransform.SetLocation(SocketLocation);
