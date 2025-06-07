@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "MyWidgetController.generated.h"
+#include "LPWidgetController.generated.h"
 
 class UAttributeSet;
 class UAbilitySystemComponent;
@@ -41,7 +41,7 @@ struct FWidgetControllerParams
  * 用户控件控制器层，用户控件可从控制器层更新数据显示，以及为控制器层提供输入。
  */
 UCLASS()
-class LOSTPLACE_API UMyWidgetController : public UObject
+class LOSTPLACE_API ULPWidgetController : public UObject
 {
 	GENERATED_BODY()
 public:

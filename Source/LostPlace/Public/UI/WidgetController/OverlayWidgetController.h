@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/AttributeSetBase.h"
-#include "MyWidgetController.h"
+#include "LPWidgetController.h"
 #include "OverlayWidgetController.generated.h"
 
-class UMyUserWidget;
+class ULPUserWidget;
 USTRUCT(BlueprintType)
 struct FUIWidgetRow : public FTableRowBase
 {
@@ -20,7 +20,7 @@ struct FUIWidgetRow : public FTableRowBase
 	FText Message = FText();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UMyUserWidget> MessageWidget;
+	TSubclassOf<ULPUserWidget> MessageWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* Image = nullptr;
@@ -36,7 +36,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidget
  * 屏幕覆盖用户控件控制器层基类，继承与用户控件控制器层，添加了四个广播，分别是生命值、最大生命值、魔法值、最大魔法值。
  */
 UCLASS(BlueprintType, Blueprintable)
-class LOSTPLACE_API UOverlayWidgetController : public UMyWidgetController
+class LOSTPLACE_API UOverlayWidgetController : public ULPWidgetController
 {
 	GENERATED_BODY()
 public:

@@ -1,10 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/MyHUD.h"
+#include "UI/LPHUD.h"
 
 
-UOverlayWidgetController* AMyHUD::GetOverlayWidgetController(const FWidgetControllerParams& WCParams)
+UOverlayWidgetController* ALPHUD::GetOverlayWidgetController(const FWidgetControllerParams& WCParams)
 {
 	if(OverlayWidgetController == nullptr)
 	{
@@ -14,13 +14,13 @@ UOverlayWidgetController* AMyHUD::GetOverlayWidgetController(const FWidgetContro
 	}
 	return OverlayWidgetController;
 }
-void AMyHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
+void ALPHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
 {
 	checkf(OverlayWidgetClass, TEXT("OverlayWidgetClass 未设置，请在HUD上面设置")); //会打印相关信息到log列表
 	checkf(OverlayWidgetControllerClass, TEXT("OverlayWidgetControllerClass 未设置，请在HUD上面设置"));
 	
-	UMyUserWidget* Widget = CreateWidget<UMyUserWidget>(GetWorld(), OverlayWidgetClass); //创建Overlay用户控件
-	OverlayWidget = Cast<UMyUserWidget>(Widget);
+	ULPUserWidget* Widget = CreateWidget<ULPUserWidget>(GetWorld(), OverlayWidgetClass); //创建Overlay用户控件
+	OverlayWidget = Cast<ULPUserWidget>(Widget);
 
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS); //创建参数结构体
 	OverlayWidgetController = GetOverlayWidgetController(WidgetControllerParams); //获取控制器层
@@ -32,7 +32,7 @@ void AMyHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystem
 
 }
 
-UAttributeMenuWidgetController* AMyHUD::GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams)
+UAttributeMenuWidgetController* ALPHUD::GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams)
 {
 	if(AttributeMenuWidgetController == nullptr)
 	{

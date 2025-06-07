@@ -12,7 +12,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "LostPlace/LostPlace.h"
-#include "UI/MyUserWidget.h"
+#include "UI/LPUserWidget.h"
 
 
 // Sets default values
@@ -67,7 +67,7 @@ void ALPEnemyCharacter::BeginPlay()
 		ULPAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent,CharacterClass);
 	}
 
-	if(UMyUserWidget* UserWidget = Cast<UMyUserWidget>(HealthBar->GetUserWidgetObject()))
+	if(ULPUserWidget* UserWidget = Cast<ULPUserWidget>(HealthBar->GetUserWidgetObject()))
 	{
 		UserWidget->SetWidgetController(this);
 	}

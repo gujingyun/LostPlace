@@ -7,7 +7,7 @@
 #include "Interface/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/LPPlayerState.h"
-#include "UI/MyHUD.h"
+#include "UI/LPHUD.h"
 
 
 UOverlayWidgetController* ULPAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
@@ -16,7 +16,7 @@ UOverlayWidgetController* ULPAbilitySystemLibrary::GetOverlayWidgetController(co
 	if(APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
 		//从PC获取到HUD，我们就可以从HUD获得对应的Controller
-		if(AMyHUD* HUD = Cast<AMyHUD>(PC->GetHUD()))
+		if(ALPHUD* HUD = Cast<ALPHUD>(PC->GetHUD()))
 		{
 			ALPPlayerState* PS = PC->GetPlayerState<ALPPlayerState>();
 			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
@@ -33,7 +33,7 @@ UAttributeMenuWidgetController* ULPAbilitySystemLibrary::GetAttributeMenuWidgetC
 	if(APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
 		//从PC获取到HUD，我们就可以从HUD获得对应的Controller
-		if(AMyHUD* HUD = Cast<AMyHUD>(PC->GetHUD()))
+		if(ALPHUD* HUD = Cast<ALPHUD>(PC->GetHUD()))
 		{
 			ALPPlayerState* PS = PC->GetPlayerState<ALPPlayerState>();
 			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();

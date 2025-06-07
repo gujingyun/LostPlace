@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "MyUserWidget.generated.h"
+#include "LPUserWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class LOSTPLACE_API UMyUserWidget : public UUserWidget
+class LOSTPLACE_API ULPUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 

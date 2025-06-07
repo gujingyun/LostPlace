@@ -9,7 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "Player/LPPlayerState.h"
 #include "Player/LPPlayerController.h"
-#include "UI/MyHUD.h"
+#include "UI/LPHUD.h"
 #include "LPPlayerBase.generated.h"
 class USpringArmComponent;
 class UCameraComponent;

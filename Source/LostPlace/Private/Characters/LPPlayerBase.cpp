@@ -59,7 +59,7 @@ void ALPPlayerBase::InitAbilityActorInfo()
 	//获取PC
 	if(ALPPlayerController* PlayerControllerBase = Cast<ALPPlayerController>(GetController()))
 	{
-		if(AMyHUD* HUD = Cast<AMyHUD>(PlayerControllerBase->GetHUD()))
+		if(ALPHUD* HUD = Cast<ALPHUD>(PlayerControllerBase->GetHUD()))
 		{
 			HUD->InitOverlay(PlayerControllerBase, PlayerStateBase, AbilitySystemComponent, AttributeSet);
 		}

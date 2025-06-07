@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MyUserWidget.h"
+#include "LPUserWidget.h"
 #include "GameFramework/HUD.h"
 #include "WidgetController/OverlayWidgetController.h"
 #include "WidgetController/AttributeMenuWidgetController.h"
-#include "MyHUD.generated.h"
+#include "LPHUD.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class LOSTPLACE_API AMyHUD : public AHUD
+class LOSTPLACE_API ALPHUD : public AHUD
 {
 	GENERATED_BODY()
 public:
@@ -27,10 +27,10 @@ public:
 private:
 	
 	UPROPERTY()
-	TObjectPtr<UMyUserWidget> OverlayWidget;
+	TObjectPtr<ULPUserWidget> OverlayWidget;
 	
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMyUserWidget> OverlayWidgetClass;
+	TSubclassOf<ULPUserWidget> OverlayWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetController;

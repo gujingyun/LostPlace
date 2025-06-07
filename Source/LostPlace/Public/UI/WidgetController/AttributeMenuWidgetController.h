@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MyWidgetController.h"
+#include "LPWidgetController.h"
 #include "GameplayTagContainer.h"
 #include "AttributeMenuWidgetController.generated.h"
 
@@ -19,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttibuteInfoSignature, const FLPAtt
  * 
  */
 UCLASS(BlueprintType, Blueprintable)
-class LOSTPLACE_API UAttributeMenuWidgetController : public UMyWidgetController
+class LOSTPLACE_API UAttributeMenuWidgetController : public ULPWidgetController
 {
 	GENERATED_BODY()
 public:
