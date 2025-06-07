@@ -106,37 +106,37 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.LMB"),
+		FName("InputTag.LMB"),
 		FString("鼠标左键")
 		);
 	
 	GameplayTags.InputTag_RMB = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.RMB"),
+		FName("InputTag.RMB"),
 		FString("鼠标右键")
 		);
 	
 	GameplayTags.InputTag_1 = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.1"),
+		FName("InputTag.1"),
 		FString("键盘1键")
 		);
 	
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.2"),
+		FName("InputTag.2"),
 		FString("键盘2键")
 		);
 	
 	GameplayTags.InputTag_3 = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.3"),
+		FName("InputTag.3"),
 		FString("键盘3键")
 		);
 	
 	GameplayTags.InputTag_4 = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
-		FName("Attributes.InputTag.4"),
+		FName("InputTag.4"),
 		FString("键盘4键")
 		);
 
@@ -222,6 +222,12 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Summon"),
 		FString("召唤技能标签")
 		);
+	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get()
+	.AddNativeGameplayTag(
+		FName("Abilities.Fire.FireBolt"),
+		FString("火球术技能标签")
+		);
+
 
 	/*
 	* Montage

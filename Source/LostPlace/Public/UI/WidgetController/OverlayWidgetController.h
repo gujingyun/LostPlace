@@ -5,9 +5,13 @@
 #include "CoreMinimal.h"
 #include "AbilitySystem/AttributeSetBase.h"
 #include "LPWidgetController.h"
+#include "AbilitySystem/AbilitySystemComponentBase.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "OverlayWidgetController.generated.h"
 
+class UAbilityInfo;
 class ULPUserWidget;
+class UAbilitySystemComponentBase;
 USTRUCT(BlueprintType)
 struct FUIWidgetRow : public FTableRowBase
 {
@@ -30,6 +34,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature,float, 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidgetRow, Row);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FLPAbilityInfo&, Info);
 
 
 /**
@@ -57,14 +62,22 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Message")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
+	FAbilityInfoSignature AbilityInfoDelegate;
+
 protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
 	
-
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Widget Data")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
+	
 	template<typename T>
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
-	
+
+	void OnInitializeStartupAbilities(UAbilitySystemComponentBase* RPGAbilitySystemComponent) const; //技能初始化应用后的回调
+
 };
 
 template <typename T>

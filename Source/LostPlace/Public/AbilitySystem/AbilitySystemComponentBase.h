@@ -7,6 +7,9 @@
 #include "AbilitySystemComponentBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags,const FGameplayTagContainer& );
+DECLARE_MULTICAST_DELEGATE_OneParam(FAbilityGiven, UAbilitySystemComponentBase*) //技能初始化应用后的回调委托
+DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&); //单播委托，只能绑定一个回调
+
 /**
  * 
  */
@@ -17,15 +20,24 @@ class LOSTPLACE_API UAbilitySystemComponentBase : public UAbilitySystemComponent
 public:
 	void AbilityActorInfoSet();
 	FEffectAssetTags EffectAssetTags;
-
+	FAbilityGiven AbilityGivenDelegate;
+	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+	
+	bool bStartupAbilitiesGiven = false; //初始化应用技能后，此值将被设置为true，用于记录当前是否被初始化完成
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
-	
-	// void AbilityInputTagPressed(const FGameplayTag& InputTag);
+
+	void ForEachAbility(const FForEachAbility& Delegate); //遍历技能，并将技能广播出去
+
+	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+
 protected:
 	UFUNCTION(Client,Reliable)
 	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
-	
+
+	virtual void OnRep_ActivateAbilities() override;
+
 };

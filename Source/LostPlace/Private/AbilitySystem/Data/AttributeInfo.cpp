@@ -3,6 +3,8 @@
 
 #include "AbilitySystem/Data/AttributeInfo.h"
 
+#include "LostPlace/LPLogChannels.h"
+
 FLPAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound) const
 {
 	for(const FLPAttributeInfo& Info : AttributeInformation)
@@ -17,7 +19,7 @@ FLPAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& Att
 	//未查询到是否打印
 	if(bLogNotFound)
 	{
-		UE_LOG(LogTemp, Error, TEXT("无法从数据列表[%s]中查找到对应的AttributeTag[%s]"), *GetNameSafe(this), *AttributeTag.ToString());
+		UE_LOG(LogLostPlace, Error, TEXT("无法从数据列表[%s]中查找到对应的AttributeTag[%s]"), *GetNameSafe(this), *AttributeTag.ToString());
 	}
 
 	return FLPAttributeInfo();
