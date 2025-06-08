@@ -6,6 +6,8 @@
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/AttributeSetBase.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
+#include "LostPlace/LPLogChannels.h"
+#include "Player/LPPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -19,7 +21,18 @@ void UOverlayWidgetController::BroadcastInitialValues()
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
+	ALPPlayerState* LPPlayerState = CastChecked<ALPPlayerState>(PlayerState);
+	LPPlayerState->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
+
+	//绑定等级相关回调
+	LPPlayerState->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
+	{
+		OnPlayerLevelChangeDelegate.Broadcast(NewLevel);
+	});
+
+	
 	const UAttributeSetBase* AttributeSetBase = CastChecked<UAttributeSetBase>(AttributeSet);
+
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		AttributeSetBase->GetHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
@@ -98,6 +111,23 @@ void UOverlayWidgetController::OnInitializeStartupAbilities(
 	});
 	//遍历技能并触发委托回调
 	AbilitySystemComponentBase->ForEachAbility(BroadcastDelegate);
+}
+
+void UOverlayWidgetController::OnXPChanged(int32 NewXP) const
+{
+	const ALPPlayerState* LPPlayerState = CastChecked<ALPPlayerState>(PlayerState);
+	const ULevelUpInfo* LevelUpInfo = LPPlayerState->LevelUpInfo;
+	checkf(LevelUpInfo, TEXT("无法查询到等级相关数据，请查看PlayerState是否设置了对应的数据"));
+	const int32 Level =  LevelUpInfo->FindLevelForXP(NewXP); //根据当前经验值查询对应的等级
+	const int32 MaxLevel = LevelUpInfo->LevelUpInformation.Num(); //获取当前最大等级
+	if(Level <= MaxLevel && Level > 0)
+	{
+		const int32 LevelUpRequirement = LevelUpInfo->LevelUpInformation[Level].LevelUpRequirement; //获取对应等级的升级经验值
+		const int32 PreviousLevelUpRequirement = LevelUpInfo->LevelUpInformation[Level-1].LevelUpRequirement;
+		const float XPPercent = static_cast<float>(NewXP - PreviousLevelUpRequirement) / (LevelUpRequirement - PreviousLevelUpRequirement);
+		OnXPPercentChangedDelegate.Broadcast(XPPercent);
+	}
+	
 }
 
 

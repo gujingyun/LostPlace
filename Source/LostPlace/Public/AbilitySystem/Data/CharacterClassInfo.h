@@ -26,6 +26,9 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY(EditDefaultsOnly, Category="类默认值")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditDefaultsOnly, Category="类默认值")
+	FScalableFloat XPReward = FScalableFloat();
 };
 
 /**

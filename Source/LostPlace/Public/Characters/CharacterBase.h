@@ -44,6 +44,7 @@ public:
 
 	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
 
+	virtual ECharacterClass GetCharacterClass_Implementation() override;
 	/* ICombatInterface战斗接口 结束 */
 	
 	UPROPERTY(BlueprintReadOnly) //蓝图可读
@@ -127,6 +128,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="战斗")
 	int32 MinionsCount = 0; //仆从数量
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="角色默认类")
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 	
 public:
 	// Called every frame
@@ -135,6 +138,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "能力")
 	TArray<TSubclassOf<UGameplayAbility> > StartupAbilities;
 
+	UPROPERTY(EditAnywhere, Category = "能力")
+	TArray<TSubclassOf<UGameplayAbility> > StartupPassiveAbilities;
+	
 	UPROPERTY(EditAnywhere, Category = "战斗")
 	TObjectPtr<UAnimMontage> HitReactMontage;
 };

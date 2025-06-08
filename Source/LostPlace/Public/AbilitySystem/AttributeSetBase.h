@@ -217,6 +217,9 @@ public:
 	FGameplayAttributeData IncomingDamage; //处理传入的伤害
 	ATTRIBUTE_ACCESSORS(UAttributeSetBase, IncomingDamage);
 
+	UPROPERTY(BlueprintReadOnly, Category="元属性")
+	FGameplayAttributeData IncomingXP; //处理传入的经验
+	ATTRIBUTE_ACCESSORS(UAttributeSetBase, IncomingXP);
 
 
 
@@ -280,5 +283,7 @@ private:
 	
 	FORCEINLINE_DEBUGGABLE void ShowFloatingText(const FEffectProperties& Props, float Damage,bool bBlockedHit,bool bCriticalHit) const;
 
-};
+	//发送经验事件
+	void SendXPEvent(const FEffectProperties& Props);
 
+};

@@ -144,6 +144,7 @@ void ACharacterBase::AddCharacterAbilities()
 	if (!HasAuthority()) return;
 	
 	LPASC->AddCharacterAbilities(StartupAbilities);
+	LPASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 }
 
 void ACharacterBase::Dissolve()
@@ -195,6 +196,12 @@ void ACharacterBase::IncrementMinionCount_Implementation(const int32 Amount)
 {
 	MinionsCount+=Amount;
 }
+
+ECharacterClass ACharacterBase::GetCharacterClass_Implementation()
+{
+	return CharacterClass;
+}
+
 
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)

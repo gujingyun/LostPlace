@@ -31,10 +31,13 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 	Vigor = FMath::Max<float>(Vigor, 0.f);
 
 	//获取等级
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	const int32 Level = CombatInterface->GetPlayerLevel();
+	int32 PlayerLevel = 1;
+	if(Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		PlayerLevel = ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
 
 	//计算最大血量
-	return 80.f + Vigor * 2.5f + Level * 10.f;
+	return 80.f + Vigor * 2.5f + PlayerLevel * 10.f;
 }
 

@@ -83,9 +83,9 @@ void ULPAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextOb
 
 	for (TSubclassOf<UGameplayAbility> AbilityClass : DefaultInfo.StartupAbilities)
 	{
-		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(ASC->GetAvatarActor()))
+		if (ASC->GetAvatarActor()->Implements<UCombatInterface>())
 		{
-			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, CombatInterface->GetPlayerLevel()); //创建技能实例
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, ICombatInterface::Execute_GetPlayerLevel(ASC->GetAvatarActor())); //创建技能实例
 			ASC->GiveAbility(AbilitySpec); //只应用不激活
 		}
 	}
@@ -174,4 +174,19 @@ bool ULPAbilitySystemLibrary::IsNotFriend(AActor* FirstActor, AActor* SecondActo
 
 	return false;
 
+}
+
+int32 ULPAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject,
+	ECharacterClass CharacterClass, int32 CharacterLevel)
+{
+	//从实例获取到关卡角色的配置
+	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if(CharacterClassInfo == nullptr) return 0;
+
+	//获取到默认的基础角色数据
+	const FCharacterClassDefaultInfo& ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+
+	const float XPReward = ClassDefaultInfo.XPReward.GetValueAtLevel(CharacterLevel);
+
+	return static_cast<int32>(XPReward);
 }

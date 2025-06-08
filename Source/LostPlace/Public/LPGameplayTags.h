@@ -42,6 +42,10 @@ public:
 	FGameplayTag Attributes_Resistance_Lightning; //雷属性伤害抵抗 标签
 	FGameplayTag Attributes_Resistance_Arcane; //魔法伤害抵抗 标签
 	FGameplayTag Attributes_Resistance_Physical; //物理伤害抵抗 标签
+
+	//元属性
+    FGameplayTag Attributes_Meta_IncomingXP; //元属性经验 标签
+	
 	/*
 	 *输入
 	 */
@@ -80,6 +84,7 @@ public:
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistance; //属性伤害标签对应属性抵抗标签
 
 	FGameplayTag Effects_HitReact; //受击 标签
+
 
 
 private:

@@ -9,7 +9,9 @@
 #include "LPGameplayTags.h"
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
 #include "Interface/CombatInterface.h"
+#include "Interface/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "LostPlace/LPLogChannels.h"
 #include "Player/LPPlayerController.h"
 
 UAttributeSetBase::UAttributeSetBase()
@@ -97,7 +99,6 @@ void UAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if(Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-		UE_LOG(LogTemp, Warning, TEXT("%s 的生命值发生了修改，当前生命值：%f"), *Props.TargetAvatarActor->GetName(), GetHealth());
 	}
 	if(Data.EvaluatedData.Attribute == GetMPAttribute())
 	{
@@ -121,6 +122,7 @@ void UAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallba
 				{
 					CombatInterface->Die();
 				}
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -132,6 +134,56 @@ void UAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			const bool bCriticalHit = ULPAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
 			ShowFloatingText(Props, LocalIncomingDamage,bBlockedHit,bCriticalHit);
 		}
+	}
+
+	if(Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
+	{
+		const float LocalIncomingXP = GetIncomingXP();
+		SetIncomingXP(0.f);
+		//将经验应用给自身
+		if(Props.SourceCharacter->Implements<UPlayerInterface>() && Props.SourceCharacter->Implements<UCombatInterface>())
+		{
+			const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
+			const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
+
+			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter,CurrentXP+LocalIncomingXP);
+			const int32 NumLevelUps = NewLevel - CurrentLevel;
+			if(NumLevelUps > 0)
+			{
+				//获取升级提供的技能点和属性点
+				int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
+				int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+
+				//提升等级，增加角色技能点和属性点
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
+				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+
+				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter); //升级
+
+				//将血量和蓝量填充满
+				SetHealth(GetMaxHealth());
+				SetMP(GetMaxMP());
+			}
+			
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+		}
+	}
+}
+void UAttributeSetBase::SendXPEvent(const FEffectProperties& Props)
+{
+	if(Props.SourceCharacter->Implements<UPlayerInterface>())
+	{
+		//从战斗接口获取等级和职业，通过蓝图函数获取可提供的经验值
+		const int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetCharacter);
+		const ECharacterClass TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter); //c++内调用BlueprintNativeEvent函数需要这样调用
+		const int32 XPReward = ULPAbilitySystemLibrary::GetXPRewardForClassAndLevel(Props.TargetCharacter, TargetClass, TargetLevel);
+
+		const FLPGameplayTags& GameplayTags = FLPGameplayTags::Get();
+		FGameplayEventData Payload; //创建Payload
+		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXP;
+		Payload.EventMagnitude = XPReward;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 	}
 }
 void UAttributeSetBase::ShowFloatingText(const FEffectProperties& Props, float Damage,bool bBlockedHit,bool bCriticalHit) const

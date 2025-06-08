@@ -30,9 +30,13 @@ float UMMC_MaxMP::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpe
 	Intelligence = FMath::Max<float>(Intelligence, 0.f);
 
 	//获取等级
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	const int32 Level = CombatInterface->GetPlayerLevel();
-
+	//从战斗接口获取到角色的等级
+	int32 PlayerLevel = 1;
+	if(Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		PlayerLevel = ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
+	
 	//计算最大MP
-	return 50.f + Intelligence * 2.5f + Level * 15.f;
+	return 50.f + Intelligence * 2.5f + PlayerLevel * 15.f;
 }

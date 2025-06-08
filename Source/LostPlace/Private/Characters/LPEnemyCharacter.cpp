@@ -147,7 +147,7 @@ AActor* ALPEnemyCharacter::GetCombatTarget_Implementation() const
 	return CombatTarget;
 }
 
-int32 ALPEnemyCharacter::GetPlayerLevel()
+int32 ALPEnemyCharacter::GetPlayerLevel_Implementation()
 {
 	return Level;
 }

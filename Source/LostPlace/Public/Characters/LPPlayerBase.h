@@ -4,21 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Characters/CharacterBase.h"
-#include "GameFramework/CharacterMovementComponent.h"
+
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Player/LPPlayerState.h"
-#include "Player/LPPlayerController.h"
-#include "UI/LPHUD.h"
+#include "Interface/PlayerInterface.h"
+
 #include "LPPlayerBase.generated.h"
 class USpringArmComponent;
 class UCameraComponent;
-
+class UNiagaraComponent;
 /**
  * 
  */
 UCLASS()
-class LOSTPLACE_API ALPPlayerBase : public ACharacterBase
+class LOSTPLACE_API ALPPlayerBase : public ACharacterBase,public IPlayerInterface
 {
 	GENERATED_BODY()
 public:
@@ -38,10 +37,27 @@ public:
 	
 	virtual void OnRep_PlayerState() override;//客户端初始化ASC
 
+
+	/* IPlayerInterface战斗接口 */
+	virtual void AddToXP_Implementation(int32 InXP) override;
+	virtual void LevelUp_Implementation() override;
+	virtual int32 GetXP_Implementation() const override;
+	virtual int32 FindLevelForXP_Implementation(int32 InXP) const override;
+	virtual int32 GetAttributePointsReward_Implementation(int32 Level) const override;
+	virtual int32 GetSpellPointsReward_Implementation(int32 Level) const override;
+	virtual void AddToPlayerLevel_Implementation(int32 InPlayerLevel) override;
+	virtual void AddToAttributePoints_Implementation(int32 InAttributePoints) override;
+	virtual void AddToSpellPoints_Implementation(int32 InSpellPoints) override;
+	/* IPlayerInterface战斗接口 结束 */
+
+
 	/** 实现ICombatInterface接口 */
-	virtual int32 GetPlayerLevel() override; //获取等级
+	virtual int32 GetPlayerLevel_Implementation() override; //获取等级
 	/** 实现ICombatInterface接口结束 */
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent; //升级特效组件
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,4 +71,8 @@ protected:
 	
 private:
 	virtual void InitAbilityActorInfo() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLevelUpParticles() const; //在多人游戏，每个客户端上播放升级特效
+
 };

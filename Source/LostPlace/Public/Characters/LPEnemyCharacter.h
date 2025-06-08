@@ -35,7 +35,7 @@ public:
 	/** 实现IEnemyInterface接口结束 */
 	
 	/** 实现ICombatInterface接口 */
-	virtual int32 GetPlayerLevel() override; //获取等级
+	virtual int32 GetPlayerLevel_Implementation() override; //获取等级
 	/** 实现ICombatInterface接口结束 */
 
 	virtual void Die() override;
@@ -69,9 +69,7 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="角色默认类")
 	int32 Level = 1;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="角色默认类")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Widget")
 	TObjectPtr<UWidgetComponent> HealthBar;
 

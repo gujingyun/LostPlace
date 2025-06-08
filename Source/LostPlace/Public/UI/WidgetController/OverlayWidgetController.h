@@ -36,6 +36,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidget
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FLPAbilityInfo&, Info);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature, int32, NewValue); //当玩家状态该表回调类型
 
 /**
  * 屏幕覆盖用户控件控制器层基类，继承与用户控件控制器层，添加了四个广播，分别是生命值、最大生命值、魔法值、最大魔法值。
@@ -66,6 +67,13 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FAbilityInfoSignature AbilityInfoDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category="GAS|XP")
+	FOnAttributeChangedSignature OnXPPercentChangedDelegate; //经验条百分比变动回调
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
+	FOnPlayerStateChangedSignature OnPlayerLevelChangeDelegate; //等级变动回调
+
+
 protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
@@ -77,6 +85,8 @@ protected:
 	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 
 	void OnInitializeStartupAbilities(UAbilitySystemComponentBase* RPGAbilitySystemComponent) const; //技能初始化应用后的回调
+
+	void OnXPChanged(int32 NewXP) const; //经验变动后的回调
 
 };
 

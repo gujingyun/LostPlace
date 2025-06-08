@@ -197,6 +197,15 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			FString("物理伤害抗性")
 		);
 
+	/**
+	 * 元属性
+	 */
+	GameplayTags.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("Attributes.Meta.IncomingXP"),
+			FString("经验元属性标签")
+			);
+	
 	/* 将属性和抗性标签对应 */
 	GameplayTags.DamageTypesToResistance.Add(GameplayTags.Damage_Fire, GameplayTags.Attributes_Resistance_Fire);
 	GameplayTags.DamageTypesToResistance.Add(GameplayTags.Damage_Lightning, GameplayTags.Attributes_Resistance_Lightning);
@@ -289,5 +298,8 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			FName("Montage.Attack.4"),
 			FString("第4个蒙太奇攻击标签")
 			);
+
+
+
 
 }
