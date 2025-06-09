@@ -174,13 +174,30 @@ void ALPPlayerBase::AddToPlayerLevel_Implementation(int32 InPlayerLevel)
 
 void ALPPlayerBase::AddToAttributePoints_Implementation(int32 InAttributePoints)
 {
-	//TODO: 增加属性点
+	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
+	check(PlayerStateBase); //检测是否有效，无限会暂停游戏
+	PlayerStateBase->AddToAttributePoints(InAttributePoints);
 }
 
 void ALPPlayerBase::AddToSpellPoints_Implementation(int32 InSpellPoints)
 {
-	//TODO: 增加技能点
-	
+	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
+	check(PlayerStateBase); //检测是否有效，无限会暂停游戏
+	PlayerStateBase->AddToSpellPoints(InSpellPoints);
+}
+
+int32 ALPPlayerBase::GetAttributePoints_Implementation() const
+{
+	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
+	check(PlayerStateBase); //检测是否有效，无限会暂停游戏
+	return PlayerStateBase->GetAttributePoints();
+}
+
+int32 ALPPlayerBase::GetSpellPoints_Implementation() const
+{
+	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
+	check(PlayerStateBase); //检测是否有效，无限会暂停游戏
+	return PlayerStateBase->GetSpellPoints();
 }
 
 int32 ALPPlayerBase::GetPlayerLevel_Implementation()

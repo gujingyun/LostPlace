@@ -150,26 +150,47 @@ void UAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			const int32 NumLevelUps = NewLevel - CurrentLevel;
 			if(NumLevelUps > 0)
 			{
-				//获取升级提供的技能点和属性点
-				int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
-				int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
+				//如果连升多级，我们通过for循环获取每个等级的奖励
+				for(int32 i = CurrentLevel; i < NewLevel; i++)
+				{
+					//获取升级提供的技能点和属性点
+					const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, i);
+					const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, i);
 
+					//增加角色技能点和属性点
+					IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
+					IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
+					
+				}
 				//提升等级，增加角色技能点和属性点
 				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumLevelUps);
-				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
-				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPointsReward);
-
 				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter); //升级
 
-				//将血量和蓝量填充满
-				SetHealth(GetMaxHealth());
-				SetMP(GetMaxMP());
+				bFillHealth = true;
+				bFillMana = true;
 			}
 			
 			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 		}
 	}
 }
+
+void UAttributeSetBase::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	if(Attribute == GetMaxHealthAttribute() && bFillHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bFillHealth = false;
+	}
+
+	if(Attribute == GetMaxMPAttribute() && bFillMana)
+	{
+		SetMP(GetMaxMP());
+		bFillMana = false;
+	}
+}
+
 void UAttributeSetBase::SendXPEvent(const FEffectProperties& Props)
 {
 	if(Props.SourceCharacter->Implements<UPlayerInterface>())

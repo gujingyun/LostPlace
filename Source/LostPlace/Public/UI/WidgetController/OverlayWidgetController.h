@@ -36,7 +36,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature,FUIWidget
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FLPAbilityInfo&, Info);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature, int32, NewValue); //当玩家状态该表回调类型
 
 /**
  * 屏幕覆盖用户控件控制器层基类，继承与用户控件控制器层，添加了四个广播，分别是生命值、最大生命值、魔法值、最大魔法值。

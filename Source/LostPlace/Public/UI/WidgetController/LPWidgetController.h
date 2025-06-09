@@ -37,6 +37,8 @@ struct FWidgetControllerParams
 	TObjectPtr<UAttributeSet> AttributeSet = nullptr;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature, int32, NewValue); //当玩家状态该表回调类型
+
 /**
  * 用户控件控制器层，用户控件可从控制器层更新数据显示，以及为控制器层提供输入。
  */

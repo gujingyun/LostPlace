@@ -11,7 +11,7 @@
 struct FGameplayAttribute;
 class UAttributeInfo;
 struct FLPAttributeInfo;
-
+struct FGameplayTag;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttibuteInfoSignature, const FLPAttributeInfo&, Info);
@@ -31,6 +31,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")//设置BlueprintAssignable可以在蓝图作为委托绑定监听
 	FAttibuteInfoSignature AttributeInfoDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
+	FOnPlayerStateChangedSignature AttributePointsChangedDelegate; //监听属性点的变化委托
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
+	FOnPlayerStateChangedSignature SpellPointsChangedDelegate; //监听属性点的变化委托
+
+	UFUNCTION(BlueprintCallable, Category="GAS|Attributes")
+	void UpgradeAttribute(const FGameplayTag& AttributeTag); //升级属性
 
 protected:
 

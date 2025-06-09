@@ -5,6 +5,8 @@
 #include "AbilitySystem/Data/AttributeInfo.h"
 #include "AbilitySystem/AttributeSetBase.h"
 #include "LPGameplayTags.h"
+#include "AbilitySystem/AbilitySystemComponentBase.h"
+#include "Player/LPPlayerState.h"
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
@@ -20,6 +22,15 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 			}
 		);
 	}
+	ALPPlayerState* PLPlayerState = CastChecked<ALPPlayerState>(PlayerState);
+	PLPlayerState->OnAttributePointsChangedDelegate.AddLambda([this](const int32 Points)
+	{
+		AttributePointsChangedDelegate.Broadcast(Points);
+	});
+	PLPlayerState->OnSpellPointsChangedDelegate.AddLambda([this](const int32 Points)
+	{
+		SpellPointsChangedDelegate.Broadcast(Points);
+	});
 }
 
 void UAttributeMenuWidgetController::BroadcastInitialValues()
@@ -31,7 +42,17 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
 
+	ALPPlayerState* PLPlayerState = CastChecked<ALPPlayerState>(PlayerState);
+	AttributePointsChangedDelegate.Broadcast(PLPlayerState->GetAttributePoints());
+	SpellPointsChangedDelegate.Broadcast(PLPlayerState->GetSpellPoints());
 }
+
+void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	UAbilitySystemComponentBase* ASC = CastChecked<UAbilitySystemComponentBase>(AbilitySystemComponent);
+	ASC->UpgradeAttribute(AttributeTag);
+}
+
 void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const
 {
 	FLPAttributeInfo Info = AttributeInfo->FindAttributeInfoForTag(AttributeTag);
