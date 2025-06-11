@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "Data/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UI/WidgetController/OverlayWidgetController.h"
-#include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "LPAbilitySystemLibrary.generated.h"
-
+struct FWidgetControllerParams;
+class USpellMenuWidgetController;
+class UOverlayWidgetController;
+class UAttributeMenuWidgetController;
+class ALPHUD;
 /**
  * 
  */
@@ -17,11 +19,17 @@ class LOSTPLACE_API ULPAbilitySystemLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintPure, Category = "LPAbilitySystemLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category = "LPAbilitySystemLibrary|WidgetController",meta=(DefaultToSelf="WorldContextObject"))
+	static bool MakeOverlayWidgetControllerPrParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams,ALPHUD*& OutHUD);
+	
+	UFUNCTION(BlueprintPure, Category = "LPAbilitySystemLibrary|WidgetController",meta=(DefaultToSelf="WorldContextObject"))
 	static UOverlayWidgetController* GetOverlayWidgetController(const UObject* WorldContextObject);
 	
-	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|WidgetController",meta=(DefaultToSelf="WorldContextObject"))
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|WidgetController",meta=(DefaultToSelf="WorldContextObject"))
+	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
 	//初始化角色的属性
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults")

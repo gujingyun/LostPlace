@@ -10,10 +10,9 @@
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
-	const UAttributeSetBase* AS = Cast<UAttributeSetBase>(AttributeSet);
 	check(AttributeInfo);
 
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetLPAS()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
 			[this,Pair](const FOnAttributeChangeData& Data)
@@ -22,12 +21,11 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 			}
 		);
 	}
-	ALPPlayerState* PLPlayerState = CastChecked<ALPPlayerState>(PlayerState);
-	PLPlayerState->OnAttributePointsChangedDelegate.AddLambda([this](const int32 Points)
+	GetLPPS()->OnAttributePointsChangedDelegate.AddLambda([this](const int32 Points)
 	{
 		AttributePointsChangedDelegate.Broadcast(Points);
 	});
-	PLPlayerState->OnSpellPointsChangedDelegate.AddLambda([this](const int32 Points)
+	GetLPPS()->OnSpellPointsChangedDelegate.AddLambda([this](const int32 Points)
 	{
 		SpellPointsChangedDelegate.Broadcast(Points);
 	});
@@ -35,22 +33,18 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 
 void UAttributeMenuWidgetController::BroadcastInitialValues()
 {
-	const UAttributeSetBase* AS = Cast<UAttributeSetBase>(AttributeSet);
 	check(AttributeInfo);
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetLPAS()->TagsToAttributes)
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
-
-	ALPPlayerState* PLPlayerState = CastChecked<ALPPlayerState>(PlayerState);
-	AttributePointsChangedDelegate.Broadcast(PLPlayerState->GetAttributePoints());
-	SpellPointsChangedDelegate.Broadcast(PLPlayerState->GetSpellPoints());
+	AttributePointsChangedDelegate.Broadcast(GetLPPS()->GetAttributePoints());
+	SpellPointsChangedDelegate.Broadcast(GetLPPS()->GetSpellPoints());
 }
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
-	UAbilitySystemComponentBase* ASC = CastChecked<UAbilitySystemComponentBase>(AbilitySystemComponent);
-	ASC->UpgradeAttribute(AttributeTag);
+	GetLPASC()->UpgradeAttribute(AttributeTag);
 }
 
 void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const

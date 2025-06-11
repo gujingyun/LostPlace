@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
-
+#include "UI/WidgetController/OverlayWidgetController.h"
+#include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "LPAbilityTypes.h"
 #include "Core/LPGameMode.h"
 #include "Engine/OverlapResult.h"
@@ -10,43 +11,62 @@
 #include "UI/LPHUD.h"
 
 
-UOverlayWidgetController* ULPAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+bool ULPAbilitySystemLibrary::MakeOverlayWidgetControllerPrParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams,ALPHUD*& OutHUD)
 {
 	//获取到playerController， 需要传入一个世界空间上下文的对象，用于得到对应世界中的PC列表，0为本地使用的PC
 	if(APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
+		OutHUD = Cast<ALPHUD>(PC->GetHUD());
 		//从PC获取到HUD，我们就可以从HUD获得对应的Controller
-		if(ALPHUD* HUD = Cast<ALPHUD>(PC->GetHUD()))
+		if(OutHUD)
 		{
 			ALPPlayerState* PS = PC->GetPlayerState<ALPPlayerState>();
 			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
 			UAttributeSet* AS = PS->GetAttributeSet();
-			const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-			return HUD->GetOverlayWidgetController(WidgetControllerParams);
+			OutWCParams.AttributeSet = AS;
+			OutWCParams.AbilitySystemComponent = ASC;
+			OutWCParams.PlayerState = PS;
+			OutWCParams.PlayerController = PC;
+			return  true;
 		}
+	}
+	return false;
+}
+
+UOverlayWidgetController* ULPAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WCParams;
+	ALPHUD* HUD = nullptr;
+	if(MakeOverlayWidgetControllerPrParams(WorldContextObject, WCParams,HUD))
+	{
+		return HUD->GetOverlayWidgetController(WCParams);
 	}
 	return nullptr;
 }
 UAttributeMenuWidgetController* ULPAbilitySystemLibrary::GetAttributeMenuWidgetController(const UObject* WorldContextObject)
 {
-	//获取到playerController， 需要传入一个世界空间上下文的对象，用于得到对应世界中的PC列表，0为本地使用的PC
-	if(APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	FWidgetControllerParams WCParams;
+	ALPHUD* HUD = nullptr;
+	if(MakeOverlayWidgetControllerPrParams(WorldContextObject, WCParams,HUD))
 	{
-		//从PC获取到HUD，我们就可以从HUD获得对应的Controller
-		if(ALPHUD* HUD = Cast<ALPHUD>(PC->GetHUD()))
-		{
-			ALPPlayerState* PS = PC->GetPlayerState<ALPPlayerState>();
-			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-			UAttributeSet* AS = PS->GetAttributeSet();
-			const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-			return HUD->GetAttributeMenuWidgetController(WidgetControllerParams);
-		}
+		return HUD->GetAttributeMenuWidgetController(WCParams);
+	}
+	return nullptr;
+}
+
+USpellMenuWidgetController* ULPAbilitySystemLibrary::GetSpellMenuWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WCParams;
+	ALPHUD* HUD = nullptr;
+	if(MakeOverlayWidgetControllerPrParams(WorldContextObject, WCParams,HUD))
+	{
+		return HUD->GetSpellMenuWidgetController(WCParams);
 	}
 	return nullptr;
 }
 
 void ULPAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject,
-	ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC)
+                                                          ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC)
 {
 	UCharacterClassInfo* ClassInfo = GetCharacterClassInfo(WorldContextObject);
 	FCharacterClassDefaultInfo ClassDefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);

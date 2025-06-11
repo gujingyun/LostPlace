@@ -55,6 +55,8 @@ public:
 	FGameplayTag InputTag_2; //2键
 	FGameplayTag InputTag_3; //3键
 	FGameplayTag InputTag_4; //4键
+	FGameplayTag InputTag_Passive_1; //被动技能1
+	FGameplayTag InputTag_Passive_2; //被动技能2
 
 
 	

@@ -139,7 +139,20 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.4"),
 		FString("键盘4键")
 		);
+	GameplayTags.InputTag_Passive_1 = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("InputTag.Passive.1"),
+			FString("被动技能1")
+			);
+	
+	GameplayTags.InputTag_Passive_2 = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("InputTag.Passive.2"),
+			FString("被动技能2")
+		);
 
+
+	
 	GameplayTags.Damage = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
 			FName("Damage"),

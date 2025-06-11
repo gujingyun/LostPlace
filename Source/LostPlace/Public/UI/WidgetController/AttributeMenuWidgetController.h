@@ -26,7 +26,6 @@ public:
 
 	virtual void BindCallbacksToDependencies() override;
 
-	UFUNCTION(BlueprintCallable)
 	virtual void BroadcastInitialValues() override;
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")//设置BlueprintAssignable可以在蓝图作为委托绑定监听

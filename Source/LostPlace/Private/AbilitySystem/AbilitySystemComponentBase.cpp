@@ -27,7 +27,7 @@ void UAbilitySystemComponentBase::AddCharacterAbilities(
 			GiveAbility(AbilitySpec);
 		}
 		bStartupAbilitiesGiven = true;
-		AbilityGivenDelegate.Broadcast(this);
+		AbilityGivenDelegate.Broadcast();
 		// GiveAbility(AbilitySpec);
 		// GiveAbilityAndActivateOnce(AbilitySpec);
 	}
@@ -147,7 +147,7 @@ void UAbilitySystemComponentBase::OnRep_ActivateAbilities()
 	if(!bStartupAbilitiesGiven)
 	{
 		bStartupAbilitiesGiven = true;
-		AbilityGivenDelegate.Broadcast(this);
+		AbilityGivenDelegate.Broadcast();
 	}
 }
 
