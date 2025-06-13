@@ -170,6 +170,10 @@ void ALPPlayerBase::AddToPlayerLevel_Implementation(int32 InPlayerLevel)
 	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
 	check(PlayerStateBase); //检测是否有效，无限会暂停游戏
 	PlayerStateBase->AddToLevel(InPlayerLevel);
+	if (UAbilitySystemComponentBase* ASC = Cast<UAbilitySystemComponentBase>(GetAbilitySystemComponent()))
+	{
+		ASC->UpdateAbilityStatuses(PlayerStateBase->GetPlayerLevel());
+	}
 }
 
 void ALPPlayerBase::AddToAttributePoints_Implementation(int32 InAttributePoints)

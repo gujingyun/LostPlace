@@ -66,9 +66,25 @@ public:
 	FGameplayTag Damage_Arcane; //魔法伤害 标签
 	FGameplayTag Damage_Physical; //物理伤害 标签
 
+	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack; //攻击
 	FGameplayTag Abilities_Summon; //召唤技能激活标签
+
+	FGameplayTag Abilities_HitReact; //受击技能标签
+
+	FGameplayTag Abilities_Status_Locked; //技能状态 已锁定
+	FGameplayTag Abilities_Status_Eligible; //技能状态 可解锁
+	FGameplayTag Abilities_Status_Unlocked; //技能状态 已解锁
+	FGameplayTag Abilities_Status_Equipped; //技能状态 已装配
+	
+	FGameplayTag Abilities_Type_Offensive; //技能类型 主动技能
+	FGameplayTag Abilities_Type_Passive; //技能类型 被动技能
+	FGameplayTag Abilities_Type_None; //技能类型 空 受击等技能设置
+
+	
 	FGameplayTag Abilities_Fire_FireBolt; //火球术技能标签
+	FGameplayTag Abilities_Lightning_Electrocute; //雷击技能标签
+
 	FGameplayTag Cooldown_Fire_FireBolt; //火球术冷却标签
 
 
@@ -86,6 +102,7 @@ public:
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistance; //属性伤害标签对应属性抵抗标签
 
 	FGameplayTag Effects_HitReact; //受击 标签
+	
 
 
 

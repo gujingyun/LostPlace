@@ -33,8 +33,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnPlayerStateChangedSignature AttributePointsChangedDelegate; //监听属性点的变化委托
-	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
-	FOnPlayerStateChangedSignature SpellPointsChangedDelegate; //监听属性点的变化委托
+
 
 	UFUNCTION(BlueprintCallable, Category="GAS|Attributes")
 	void UpgradeAttribute(const FGameplayTag& AttributeTag); //升级属性

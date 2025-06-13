@@ -7,6 +7,7 @@
 #include "LPGameMode.generated.h"
 
 class UCharacterClassInfo;
+class UAbilityInfo;
 /**
  * 
  */
@@ -18,5 +19,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="角色类默认值")
 	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
+
+	
+	UPROPERTY(EditDefaultsOnly, Category="能力信息")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
 
 };

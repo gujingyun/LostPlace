@@ -121,6 +121,15 @@ UCharacterClassInfo* ULPAbilitySystemLibrary::GetCharacterClassInfo(const UObjec
 	return GameMode->CharacterClassInfo;
 }
 
+UAbilityInfo* ULPAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContextObject)
+{
+	//获取到当前关卡的GameMode实例
+	const ALPGameMode* GameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if(GameMode == nullptr)  return nullptr;
+
+	return GameMode->AbilityInfo;
+}
+
 bool ULPAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))

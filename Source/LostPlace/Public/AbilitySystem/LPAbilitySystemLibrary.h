@@ -11,6 +11,7 @@ class USpellMenuWidgetController;
 class UOverlayWidgetController;
 class UAttributeMenuWidgetController;
 class ALPHUD;
+class UAbilityInfo;
 /**
  * 
  */
@@ -42,6 +43,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|AbilityInfo")
+	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
+
+	
 	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
 

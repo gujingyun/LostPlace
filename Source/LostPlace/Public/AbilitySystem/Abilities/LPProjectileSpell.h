@@ -26,6 +26,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag, const bool bOverridePitch = false, const float PitchOverride = 0.f);
+
+	UPROPERTY(EditAnywhere)
+	int32 NumProjectiles = 5;
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 

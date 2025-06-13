@@ -29,3 +29,9 @@ FTaggedMontage ULPDamageGameplayAbility::GetRandomTaggedMontageFromArray(const T
 	}
 	return FTaggedMontage();
 }
+
+float ULPDamageGameplayAbility::GetDamageByDamageType(float InLevel, const FGameplayTag& DGameplayTag)
+{
+	checkf(DamageTypes.Contains(DGameplayTag), TEXT("DamageTypes 未包含指定的 DamageType"),*GetNameSafe(this),*DGameplayTag.ToString());
+	return DamageTypes[DGameplayTag].GetValueAtLevel(InLevel);
+}

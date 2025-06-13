@@ -5,7 +5,9 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "LPGameplayTags.h"
+#include "AbilitySystem/LPAbilitySystemLibrary.h"
 #include "AbilitySystem/Abilities/GameplayAbilityBase.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "Interface/PlayerInterface.h"
 #include "LostPlace/LPLogChannels.h"
 
@@ -24,6 +26,7 @@ void UAbilitySystemComponentBase::AddCharacterAbilities(
 		if (const UGameplayAbilityBase* AbilityBase = Cast<UGameplayAbilityBase>(AbilitySpec.Ability))
 		{
 			AbilitySpec.GetDynamicSpecSourceTags().AddTag(AbilityBase->StartupInputTag);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FLPGameplayTags::Get().Abilities_Status_Equipped);
 			GiveAbility(AbilitySpec);
 		}
 		bStartupAbilitiesGiven = true;
@@ -113,6 +116,19 @@ FGameplayTag UAbilitySystemComponentBase::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
+FGameplayTag UAbilitySystemComponentBase::GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for(FGameplayTag Tag : AbilitySpec.GetDynamicSpecSourceTags()) //从技能实例的动态标签容器中遍历所有标签
+	{
+		if(Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Status")))) 
+		{
+			return Tag;
+		}
+	}
+
+	return FGameplayTag();
+}
+
 void UAbilitySystemComponentBase::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	//判断Avatar是否基础角色接口
@@ -123,6 +139,100 @@ void UAbilitySystemComponentBase::UpgradeAttribute(const FGameplayTag& Attribute
 		{
 			ServerUpgradeAttribute(AttributeTag); //调用服务器升级属性
 		}
+	}
+}
+
+FGameplayAbilitySpec* UAbilitySystemComponentBase::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	FScopedAbilityListLock ActiveScopeLoc(*this); //域锁
+	//遍历已经应用的技能
+	for(FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		for(FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if(Tag.MatchesTag(AbilityTag))
+			{
+				return &AbilitySpec;
+			}
+		}
+	}
+	return nullptr;
+}
+
+void UAbilitySystemComponentBase::UpdateAbilityStatuses(int32 Level)
+{
+	//从GameMode获取到技能配置数据
+	UAbilityInfo* AbilityInfo = ULPAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	for(const FLPAbilityInfo& Info : AbilityInfo->AbilityInformation)
+	{
+		if(!Info.AbilityTag.IsValid()) continue; //如果没有技能标签，取消执行
+		if(Level < Info.LevelRequirement) continue; //如果当期等级未达到所需等级，取消执行
+		//判断ASC中是否已存在当前技能实例
+		if(GetSpecFromAbilityTag(Info.AbilityTag) == nullptr)
+		{
+			//如果没有技能实例，将应用一个新的技能实例
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(FLPGameplayTags::Get().Abilities_Status_Eligible);
+			GiveAbility(AbilitySpec);
+			MarkAbilitySpecDirty(AbilitySpec); //设置当前技能立即复制到每个客户端
+
+			ClientUpdateAbilityStatus(Info.AbilityTag, FLPGameplayTags::Get().Abilities_Status_Eligible,1); //调用客户端更新技能状态
+		}
+	}
+}
+
+bool UAbilitySystemComponentBase::GetDescriptionByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
+	FString& OutNextLevelDescription)
+{
+	//如果当前技能处于锁定状态，将无法获取到对应的技能描述
+	if(FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		if(UGameplayAbilityBase* LPAbility = Cast<UGameplayAbilityBase>(AbilitySpec->Ability))
+		{
+			OutDescription = LPAbility->GetDescription(AbilitySpec->Level);
+			OutNextLevelDescription = LPAbility->GetNextLevelDescription(AbilitySpec->Level + 1);
+			return true;
+		}
+	}
+
+	//如果技能是锁定状态，将显示锁定技能描述
+	UAbilityInfo* AbilityInfo = ULPAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	if (!AbilityTag.IsValid() || AbilityTag.MatchesTagExact(FLPGameplayTags::Get().Abilities_None))
+	{
+		OutDescription = FString();
+	}else
+	{
+		OutDescription = UGameplayAbilityBase::GetLockedDescription(AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+	}
+	OutNextLevelDescription = FString();
+	return  false;
+}
+
+void UAbilitySystemComponentBase::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
+{
+	if(FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+
+		if (GetAvatarActor()->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToSpellPoints(GetAvatarActor(), -1);
+		}
+		
+		const FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
+		FGameplayTag Status = GetStatusFromSpec(*AbilitySpec);
+		if(Status.MatchesTag(GameplayTags.Abilities_Status_Eligible))
+		{
+			AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Eligible);
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
+			Status = GameplayTags.Abilities_Status_Unlocked;
+		}
+		else if (Status.MatchesTag(GameplayTags.Abilities_Status_Equipped)||Status.MatchesTag(GameplayTags.Abilities_Status_Unlocked))
+		{
+			AbilitySpec->Level += 1;
+		}
+		
+		ClientUpdateAbilityStatus(AbilityTag,Status,AbilitySpec->Level);
+		MarkAbilitySpecDirty(*AbilitySpec);
 	}
 }
 
@@ -139,6 +249,12 @@ void UAbilitySystemComponentBase::ServerUpgradeAttribute_Implementation(const FG
 		IPlayerInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1); //减少一点可分配属性点
 	}
 	
+}
+
+void UAbilitySystemComponentBase::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag,
+	const FGameplayTag& StatusTag,int32 AbilityLevel)
+{
+	AbilityStatusChanged.Broadcast(AbilityTag, StatusTag,AbilityLevel);
 }
 
 void UAbilitySystemComponentBase::OnRep_ActivateAbilities()

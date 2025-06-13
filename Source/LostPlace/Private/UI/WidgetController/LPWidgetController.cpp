@@ -34,6 +34,8 @@ void ULPWidgetController::BroadcastAbilityInfo()
 		FLPAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(UAbilitySystemComponentBase::GetAbilityTagFromSpec(AbilitySpec));
 		//获取到技能的输入标签
 		Info.InputTag = UAbilitySystemComponentBase::GetInputTagFromSpec(AbilitySpec);
+
+		Info.StatusTag = UAbilitySystemComponentBase::GetStatusFromSpec(AbilitySpec);
 		//广播技能数据
 		AbilityInfoDelegate.Broadcast(Info); 
 	});

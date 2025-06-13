@@ -74,3 +74,4 @@ void ULPProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation
 	Projectile->FinishSpawning(SpawnTransform);
 }
 
+
