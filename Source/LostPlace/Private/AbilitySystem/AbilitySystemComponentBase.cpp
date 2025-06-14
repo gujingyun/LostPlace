@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "LPGameplayTags.h"
+#include "GameplayTagContainer.h"
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
 #include "AbilitySystem/Abilities/GameplayAbilityBase.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
@@ -129,6 +130,24 @@ FGameplayTag UAbilitySystemComponentBase::GetStatusFromSpec(const FGameplayAbili
 	return FGameplayTag();
 }
 
+FGameplayTag UAbilitySystemComponentBase::GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetInputTagFromSpec(*AbilitySpec);
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAbilitySystemComponentBase::GetStatusFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetStatusFromSpec(*AbilitySpec);
+	}
+	return FGameplayTag();
+}
+
 void UAbilitySystemComponentBase::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	//判断Avatar是否基础角色接口
@@ -181,8 +200,40 @@ void UAbilitySystemComponentBase::UpdateAbilityStatuses(int32 Level)
 	}
 }
 
+void UAbilitySystemComponentBase::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag,
+	const FGameplayTag& Slot)
+{
+	if(FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		const FLPGameplayTags& GameplayTags = FLPGameplayTags::Get();
+		const FGameplayTag PrevSlot = GetInputTagFromSpec(*AbilitySpec);
+		const FGameplayTag Status = GetStatusFromSpec(*AbilitySpec);
+		const bool bStatusValid = Status == GameplayTags.Abilities_Status_Equipped || Status == GameplayTags.Abilities_Status_Unlocked;
+		
+		if(bStatusValid)
+		{
+			ClearAbilitiesOfSlot(Slot); //清除当前槽位上的所有技能
+			ClearSlot(AbilitySpec); //清除当前技能的槽位
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag(Slot); //设置当前技能的槽位
+			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			{
+				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
+			}
+			MarkAbilitySpecDirty(*AbilitySpec); //设置当前技能立即复制到每个客户端
+		}
+		ClientEquipAbility(AbilityTag, GameplayTags.Abilities_Status_Equipped, Slot, PrevSlot); //调用客户端装备技能
+	}
+}
+
+void UAbilitySystemComponentBase::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag,
+	const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
+{
+	AbilityEquipped.Broadcast(AbilityTag, Status, Slot, PreviousSlot);
+}
+
 bool UAbilitySystemComponentBase::GetDescriptionByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
-	FString& OutNextLevelDescription)
+                                                             FString& OutNextLevelDescription)
 {
 	//如果当前技能处于锁定状态，将无法获取到对应的技能描述
 	if(FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
@@ -206,6 +257,38 @@ bool UAbilitySystemComponentBase::GetDescriptionByAbilityTag(const FGameplayTag&
 	}
 	OutNextLevelDescription = FString();
 	return  false;
+}
+
+void UAbilitySystemComponentBase::ClearSlot(FGameplayAbilitySpec* AbilitySpec)
+{
+	const FGameplayTag Slot = GetInputTagFromSpec(*AbilitySpec);
+	AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(Slot);
+	MarkAbilitySpecDirty(*AbilitySpec);
+}
+
+void UAbilitySystemComponentBase::ClearAbilitiesOfSlot(const FGameplayTag& SlotTag)
+{
+	FScopedAbilityListLock ActiveScopeLoc(*this); //域锁
+	for(FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if(AbilityHasSlot(&AbilitySpec,SlotTag))
+		{
+			ClearSlot(&AbilitySpec);
+		}
+	}
+}
+
+bool UAbilitySystemComponentBase::AbilityHasSlot(FGameplayAbilitySpec* AbilitySpec, const FGameplayTag& SlotTag)
+{
+	
+	for (FGameplayTag Tag : AbilitySpec->GetDynamicSpecSourceTags())
+	{
+		if (Tag.MatchesTag(SlotTag))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void UAbilitySystemComponentBase::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)

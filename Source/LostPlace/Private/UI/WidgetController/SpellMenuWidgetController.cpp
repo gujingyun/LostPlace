@@ -4,6 +4,7 @@
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 
 #include "LPGameplayTags.h"
+#include "GameplayTagContainer.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Player/LPPlayerState.h"
 
@@ -36,6 +37,11 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 			AbilityInfoDelegate.Broadcast(Info);
 		}
 	});
+	
+	//监听技能装配的回调
+	GetLPASC()->AbilityEquipped.AddUObject(this, &USpellMenuWidgetController::OnAbilityEquipped);
+	
+
 	GetLPPS()->OnSpellPointsChangedDelegate.AddLambda([this](const int32 Points)
 	{
 		SpellPointsChangedDelegate.Broadcast(Points);
@@ -52,6 +58,14 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 
 void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityTag)
 {
+	if (bWaitingForEquipSelection)
+	{
+		const FGameplayTag SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType;
+		StopWaitingForEquipDelegate.Broadcast(SelectedAbilityType);
+		bWaitingForEquipSelection = false;
+	}
+
+	
 	const FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
 	const int32 SpellPoints = GetLPPS()->GetSpellPoints();
 	FGameplayTag AbilityStatus;
@@ -90,10 +104,67 @@ void USpellMenuWidgetController::SpendPointButtonPressed()
 
 void USpellMenuWidgetController::GlobeDeselect()
 {
+	if (bWaitingForEquipSelection)
+	{
+		const FGameplayTag SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
+		StopWaitingForEquipDelegate.Broadcast(SelectedAbilityType);
+		bWaitingForEquipSelection = false;
+	}
+
+	
 	const FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
 	SelectedAbility.Ability = GameplayTags.Abilities_None;
 	SelectedAbility.Status = GameplayTags.Abilities_Status_Locked;
 	SpellGlobeSelectedDelegate.Broadcast(false,false,FString(), FString());
+}
+
+void USpellMenuWidgetController::EquipButtonPressed()
+{
+	const FGameplayTag AbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
+	WaitForEquipDelegate.Broadcast(AbilityType);
+	bWaitingForEquipSelection = true;
+
+	const FGameplayTag SelectedStatus = GetLPASC()->GetStatusFromAbilityTag(SelectedAbility.Status);
+
+	if (SelectedStatus.MatchesTag(FLPGameplayTags::Get().Abilities_Status_Equipped))
+	{
+		SelectedSlot = GetLPASC()->GetInputTagFromAbilityTag(SelectedAbility.Ability);
+	}
+	
+}
+
+void USpellMenuWidgetController::SpellRowGlobePressed(const FGameplayTag& SlotTag, const FGameplayTag& AbilityType)
+{
+	if (!bWaitingForEquipSelection) return;
+	const FGameplayTag& SelectedAbilityType = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.Ability).AbilityType;
+	if (!SelectedAbilityType.MatchesTag(AbilityType)) return;
+	GetLPASC()->ServerEquipAbility(SelectedAbility.Ability,SlotTag);
+
+}
+
+void USpellMenuWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& Status,
+	const FGameplayTag& Slot, const FGameplayTag& PreviousSlot)
+{
+	bWaitingForEquipSelection = false;
+
+	const FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
+
+	//清除旧插槽的数据
+	FLPAbilityInfo  LastSlotInfo;
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;
+	LastSlotInfo.InputTag = PreviousSlot;
+	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None;
+	AbilityInfoDelegate.Broadcast(LastSlotInfo);
+
+	//更新新插槽的数据
+	FLPAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+	Info.StatusTag = Status;
+	Info.InputTag = Slot;
+	AbilityInfoDelegate.Broadcast(Info);
+
+	StopWaitingForEquipDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType);
+	SpellGlobeReassignedDelegate.Broadcast(AbilityTag);
+	GlobeDeselect();
 }
 
 void USpellMenuWidgetController::ShouldEnableButtons(const FGameplayTag& AbilityStatus, int32 SpellPoints,

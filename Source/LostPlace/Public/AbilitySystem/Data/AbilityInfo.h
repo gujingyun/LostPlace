@@ -20,7 +20,9 @@ struct FLPAbilityInfo
 	//技能冷却标签
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag CooldownTag = FGameplayTag();
-	
+	//能力类型标签
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag AbilityType = FGameplayTag();
 	//技能状态标签
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag StatusTag = FGameplayTag();

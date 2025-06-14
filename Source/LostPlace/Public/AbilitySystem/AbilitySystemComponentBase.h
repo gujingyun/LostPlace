@@ -11,6 +11,8 @@ DECLARE_MULTICAST_DELEGATE(FAbilityGiven) //技能初始化应用后的回调委
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&); //单播委托，只能绑定一个回调
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged, const FGameplayTag& /*技能标签*/, const FGameplayTag& /*技能状态标签*/, int32 /*技能等级*/);
 
+DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquipped, const FGameplayTag& /*技能标签*/, const FGameplayTag& /*技能状态标签*/, const FGameplayTag& /*输入标签*/, const FGameplayTag& /*上一个输入标签*/);
+
 /**
  * 
  */
@@ -23,6 +25,7 @@ public:
 	FEffectAssetTags EffectAssetTags;
 	FAbilityGiven AbilityGivenDelegate;
 	FAbilityStatusChanged AbilityStatusChanged; //技能状态更新委托
+	FAbilityEquipped AbilityEquipped; //技能装配更新回调
 
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 	
@@ -38,6 +41,9 @@ public:
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+
+	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
+	FGameplayTag GetStatusFromAbilityTag(const FGameplayTag& AbilityTag);
 	
 	void UpgradeAttribute(const FGameplayTag& AttributeTag); //升级属性
 
@@ -51,8 +57,19 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag); //只在服务器端运行，消耗技能点函数提升技能等级
 
+
+	
+	UFUNCTION(Server, Reliable)
+	void ServerEquipAbility(const FGameplayTag& AbilityTag,const FGameplayTag& Slot ); //只在服务器端运行，装配技能函数
+
+	UFUNCTION(Client, Reliable) //在客户端处理技能装配
+	void ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreviousSlot);
+
 	bool GetDescriptionByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription, FString& OutNextLevelDescription); //通过标签获取技能描述
 
+	void ClearSlot(FGameplayAbilitySpec* AbilitySpec);
+	void ClearAbilitiesOfSlot(const FGameplayTag& SlotTag); //清空技能槽位的技能
+	static  bool AbilityHasSlot(FGameplayAbilitySpec* AbilitySpec,const FGameplayTag& SlotTag); //技能是否有槽位
 protected:
 	UFUNCTION(Client,Reliable)
 	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);

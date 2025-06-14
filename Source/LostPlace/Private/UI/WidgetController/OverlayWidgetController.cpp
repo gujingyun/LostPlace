@@ -3,6 +3,7 @@
 
 #include "UI/WidgetController/OverlayWidgetController.h"
 
+#include "LPGameplayTags.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/AttributeSetBase.h"
 
@@ -59,6 +60,9 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	);
 	if (GetLPASC())
 	{
+
+		
+		GetLPASC()->AbilityEquipped.AddUObject(this, &ThisClass::OnAbilityEquipped);
 		if(GetLPASC()->bStartupAbilitiesGiven)
 		{
 			//如果执行到此处时，技能的初始化工作已经完成，则直接调用初始化回调
@@ -102,6 +106,28 @@ void UOverlayWidgetController::OnXPChanged(int32 NewXP)
 		const float XPPercent = static_cast<float>(NewXP - PreviousLevelUpRequirement) / (LevelUpRequirement - PreviousLevelUpRequirement);
 		OnXPPercentChangedDelegate.Broadcast(XPPercent);
 	}
+	
+}
+
+void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& Status,
+	const FGameplayTag& Slot, const FGameplayTag& PreviousSlot) const
+{
+
+	const FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
+
+	//清除旧插槽的数据
+	FLPAbilityInfo  LastSlotInfo;
+	LastSlotInfo.StatusTag = GameplayTags.Abilities_Status_Unlocked;
+	LastSlotInfo.InputTag = PreviousSlot;
+	LastSlotInfo.AbilityTag = GameplayTags.Abilities_None;
+	AbilityInfoDelegate.Broadcast(LastSlotInfo);
+
+	//更新新插槽的数据
+	FLPAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+	Info.StatusTag = Status;
+	Info.InputTag = Slot;
+	AbilityInfoDelegate.Broadcast(Info);
+
 	
 }
 

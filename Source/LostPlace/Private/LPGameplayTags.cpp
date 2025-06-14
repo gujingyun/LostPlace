@@ -2,7 +2,7 @@
 
 
 #include "LPGameplayTags.h"
-
+#include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 
 FLPGameplayTags FLPGameplayTags::GameplayTags;
