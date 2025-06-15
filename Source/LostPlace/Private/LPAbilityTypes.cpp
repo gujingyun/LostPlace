@@ -43,10 +43,38 @@ bool FLPGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map
 		{
 			RepBits |= 1 << 8;
 		}
+		if(IsSuccessfulDeBuff())
+		{
+			RepBits |= 1 << 9;
+		}
+		if(GetDeBuffDamage() > 0.f)
+		{
+			RepBits |= 1 << 10;
+		}
+		if(GetDeBuffDuration() > 0.f)
+		{
+			RepBits |= 1 << 11;
+		}
+		if(GetDeBuffFrequency() > 0.f)
+		{
+			RepBits |= 1 << 12;
+		}
+		if(GetDamageType().IsValid())
+		{
+			RepBits |= 1 << 13;
+		}
+		if(!DeathImpulse.IsZero())
+		{
+			RepBits |= 1 << 14;
+		}
+		if(!KnockbackForce.IsZero())
+		{
+			RepBits |= 1 << 15;
+		}
 	}
 
 	//序列化RepBits
-	Ar.SerializeBits(&RepBits, 9);
+	Ar.SerializeBits(&RepBits, 16);
 
 	//如果对应位的值为1，那么将数据存入Ar
 	if (RepBits & (1 << 0))
@@ -96,6 +124,41 @@ bool FLPGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map
 	if (RepBits & (1 << 8))
 	{
 		Ar << bIsCriticalHit;
+	}
+	if (RepBits & (1 << 9))
+	{
+		Ar << bIsSuccessfulDeBuff;
+	}
+	if (RepBits & (1 << 10))
+	{
+		Ar << DeBuffDamage;
+	}
+	if (RepBits & (1 << 11))
+	{
+		Ar << DeBuffDuration;
+	}
+	if (RepBits & (1 << 12))
+	{
+		Ar << DeBuffFrequency;
+	}
+	if (RepBits & (1 << 13))
+	{
+		if (Ar.IsLoading()) //判断是否在加载资源
+		{
+			if (!DamageType.IsValid())
+			{
+				DamageType = TSharedPtr<FGameplayTag>(new FGameplayTag());
+			}
+		}
+		DamageType->NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 14))
+	{
+		DeathImpulse.NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 15))
+	{
+		KnockbackForce.NetSerialize(Ar, Map, bOutSuccess);
 	}
 	//如果是加载数据（即反序列化）时，需要调用对ASC进行初始化
 	if (Ar.IsLoading())

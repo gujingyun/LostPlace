@@ -7,7 +7,7 @@
 
 FString ULPFireBolt::GetDescription(int32 Level)
 {
-	const int32 Damage = GetDamageByDamageType(Level,FLPGameplayTags::Get().Damage_Fire); //根据等级获取技能伤害
+	const int32 ScaledDamage = Damage.GetValueAtLevel(Level);
 	const float MPCost = GetManaCost(Level);
 	const float Cooldown = GetCooldown(Level);
 	return FString::Printf(TEXT(
@@ -27,12 +27,12 @@ FString ULPFireBolt::GetDescription(int32 Level)
 	Cooldown,
 	MPCost,
 	FMath::Min(Level, NumProjectiles),
-	Damage);
+	ScaledDamage);
 }
 
 FString ULPFireBolt::GetNextLevelDescription(int32 Level)
 {
-	const int32 Damage = GetDamageByDamageType(Level,FLPGameplayTags::Get().Damage_Fire); //根据等级获取技能伤害
+	const int32 ScaledDamage = Damage.GetValueAtLevel(Level);
 	const float MPCost = GetManaCost(Level);
 	const float Cooldown = GetCooldown(Level);
 	return FString::Printf(TEXT(
@@ -52,5 +52,5 @@ FString ULPFireBolt::GetNextLevelDescription(int32 Level)
 			Cooldown,
 			MPCost,
 			FMath::Min(Level, NumProjectiles),
-			Damage);
+			ScaledDamage);
 }

@@ -8,8 +8,13 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class UAbilitySystemComponent;
 class UAnimMontage;
 class UNiagaraSystem;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*); //Actor初始化ASC完成后委托
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor); //Actor死亡后的委托
+
 //蒙太奇动画和标签以及骨骼位置的映射，用于攻击技能获取和设置攻击范围
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -65,7 +70,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UAnimMontage* GetHitReactMontage();
 
-	virtual void Die() = 0;
+	virtual void Die(const FVector& DeathImpulse) = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead() const; //获取当前角色是否死亡
@@ -90,5 +95,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	ECharacterClass GetCharacterClass(); //获取当前角色的职业
+
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0; //获取ASC注册成功后的委托
+	virtual FOnDeath& GetOnDeathDelegate() = 0; //获取死亡委托
 
 };

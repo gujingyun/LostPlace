@@ -49,15 +49,12 @@ void AProjectile::BeginPlay()
 
 void AProjectile::Destroyed()
 {
-	if (!bHit && !HasAuthority())
-	{
-		PlayImpact();
-		bHit = true;
-	}
+	if (!bHit && !HasAuthority())OnHit();
+
 	Super::Destroyed();
 }
 
-void AProjectile::PlayImpact() const
+void AProjectile::OnHit()
 {
 	//播放音效
 	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
@@ -67,46 +64,43 @@ void AProjectile::PlayImpact() const
 	{
 		LoopingSoundComponent->Stop();
 	}
+	bHit = true;
 }
 
 void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (DamageEffectHandle == nullptr)
-	{
-		return;
-	}
-	if (!DamageEffectHandle.Data.IsValid() || DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
-	{
-		return;
-	}
-	TSharedPtr<FGameplayEffectSpec> GameplayEffectSpec = DamageEffectHandle.Data;
-	FGameplayEffectSpec* EffectSpec = GameplayEffectSpec.Get();
-	FGameplayEffectContextHandle GameplayEffectContextHandle = EffectSpec->GetContext();
-	AActor* EffectCauser = GameplayEffectContextHandle.GetEffectCauser();
+	AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
 
-	if (!ULPAbilitySystemLibrary::IsNotFriend(EffectCauser, OtherActor))
-	{
-		return;
-	}
-	if (!bHit)
-	{
-		PlayImpact();
-		bHit = true;
-	}
+	if (SourceAvatarActor == OtherActor) return;//如果是自己的话，直接返回
+	
+	if (!ULPAbilitySystemLibrary::IsNotFriend(SourceAvatarActor, OtherActor)) return;
+
+	if (!bHit) OnHit();
 	
 	if (HasAuthority())
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectHandle.Data.Get());
+			const FVector DeathImpulse = GetActorForwardVector() * DamageEffectParams.DeathImpulseMagnitude;
+			DamageEffectParams.DeathImpulse = DeathImpulse;
+			const bool bKnockback = FMath::RandRange(1, 100) < DamageEffectParams.KnockbackChance;
+			if (bKnockback)
+			{
+				FRotator Rotation = GetActorRotation();
+				Rotation.Pitch = 45.f;
+				
+				const FVector KnockbackDirection = Rotation.Vector();
+				const FVector KnockbackForce = KnockbackDirection * DamageEffectParams.KnockbackForceMagnitude;
+				DamageEffectParams.KnockbackForce = KnockbackForce;
+			}
+			
+			DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+			ULPAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
 		
 		Destroy();
-	}else
-	{
-		bHit = true;
-	}
+	}else bHit = true;
 }
 
 

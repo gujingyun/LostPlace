@@ -37,11 +37,7 @@ public:
 	FGameplayTag Attributes_Secondary_ManaRegeneration;
 
 
-	//属性伤害抗性
-	FGameplayTag Attributes_Resistance_Fire; //火属性伤害抵抗 标签
-	FGameplayTag Attributes_Resistance_Lightning; //雷属性伤害抵抗 标签
-	FGameplayTag Attributes_Resistance_Arcane; //魔法伤害抵抗 标签
-	FGameplayTag Attributes_Resistance_Physical; //物理伤害抵抗 标签
+
 
 	//元属性
     FGameplayTag Attributes_Meta_IncomingXP; //元属性经验 标签
@@ -65,6 +61,21 @@ public:
 	FGameplayTag Damage_Lightning; //雷属性伤害 标签
 	FGameplayTag Damage_Arcane; //魔法伤害 标签
 	FGameplayTag Damage_Physical; //物理伤害 标签
+	//属性伤害抗性
+	FGameplayTag Attributes_Resistance_Fire; //火属性伤害抵抗 标签
+	FGameplayTag Attributes_Resistance_Lightning; //雷属性伤害抵抗 标签
+	FGameplayTag Attributes_Resistance_Arcane; //魔法伤害抵抗 标签
+	FGameplayTag Attributes_Resistance_Physical; //物理伤害抵抗 标签
+
+	FGameplayTag DeBuff_Burn; //火属性负面效果 燃烧
+	FGameplayTag DeBuff_Stun; //雷属性负面效果 眩晕
+	FGameplayTag DeBuff_Arcane; //魔法伤害负面效果
+	FGameplayTag DeBuff_Physical; //物理伤害负面效果 流血
+
+	FGameplayTag DeBuff_Chance; //负面效果触发几率标签
+	FGameplayTag DeBuff_Damage; //负面效果伤害标签
+	FGameplayTag DeBuff_Duration; //负面效果持续时间标签
+	FGameplayTag DeBuff_Frequency; //负面效果触发间隔标签
 
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack; //攻击
@@ -100,6 +111,8 @@ public:
 	FGameplayTag Montage_Attack_4;
 
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistance; //属性伤害标签对应属性抵抗标签
+	
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToDebuffs; //属性伤害标签对应负面标签
 
 	FGameplayTag Effects_HitReact; //受击 标签
 	

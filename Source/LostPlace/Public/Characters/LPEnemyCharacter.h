@@ -38,7 +38,9 @@ public:
 	virtual int32 GetPlayerLevel_Implementation() override; //获取等级
 	/** 实现ICombatInterface接口结束 */
 
-	virtual void Die() override;
+	
+	virtual void Die(const FVector& DeathImpulse) override;
+
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnHealthChanged;

@@ -113,6 +113,7 @@ void ALPEnemyCharacter::InitAbilityActorInfo()
 	{
 		InitDefaultAttributes();
 	}
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
 	
 }
 
@@ -152,11 +153,11 @@ int32 ALPEnemyCharacter::GetPlayerLevel_Implementation()
 	return Level;
 }
 
-void ALPEnemyCharacter::Die()
+void ALPEnemyCharacter::Die(const FVector& DeathImpulse)
 {
 	SetLifeSpan(LifeSpan);
 	if (LPAIController)	LPAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Dead"), true);
-	Super::Die();
+	Super::Die(DeathImpulse);
 }
 
 

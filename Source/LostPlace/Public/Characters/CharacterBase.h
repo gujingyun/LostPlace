@@ -12,6 +12,7 @@
 #include "Interface/CombatInterface.h"
 #include "CharacterBase.generated.h"
 
+class UDebuffNiagaraComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UGameplayEffect;
@@ -31,7 +32,7 @@ public:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; } //获取as
 	/* ICombatInterface战斗接口 */
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override; //覆盖虚函数获取蒙太奇
-	virtual void Die() override;
+	virtual void Die(const FVector& DeathImpulse) override;
 	virtual  FVector GetCombatSocketLocation_Implementation(const FGameplayTag CombatTag) override;
 	
 	virtual bool IsDead_Implementation() const override;
@@ -45,15 +46,25 @@ public:
 	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
 
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
+
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
+	
+	virtual FOnDeath& GetOnDeathDelegate() override;
+	
 	/* ICombatInterface战斗接口 结束 */
+
+	FOnASCRegistered OnASCRegistered; //ASC注册成功委托
+	FOnDeath OnDeath; //角色死亡后触发的死亡委托
+
 	
 	UPROPERTY(BlueprintReadOnly) //蓝图可读
 	bool bHighlighted = false; //是否高亮
 	
 
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void MulticastHandleDeath();
+	virtual void MulticastHandleDeath(const FVector& DeathImpulse);
 
+	
 	UPROPERTY(EditAnywhere, Category="战斗")
 	TArray<FTaggedMontage> AttackMontage;
 
@@ -130,7 +141,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="角色默认类")
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-	
+
+	UPROPERTY(VisibleAnywhere, Category="战斗")
+	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

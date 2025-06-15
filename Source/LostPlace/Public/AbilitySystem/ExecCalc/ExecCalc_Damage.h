@@ -15,5 +15,9 @@ class LOSTPLACE_API UExecCalc_Damage : public UGameplayEffectExecutionCalculatio
 	GENERATED_BODY()
 public:
 	UExecCalc_Damage();
+	void DetermineDeBuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	                     const FGameplayEffectSpec& Spec,
+	                     FAggregatorEvaluateParameters EvaluationParameters,
+	                     const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& InTagsToDefs) const;
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
 };

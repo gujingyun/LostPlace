@@ -67,6 +67,8 @@ void ALPPlayerBase::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(PlayerStateBase, this);
 	
 	Cast<UAbilitySystemComponentBase>(PlayerStateBase->GetAbilitySystemComponent())->AbilityActorInfoSet();
+
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
 	
 	//获取PC
 	if(ALPPlayerController* PlayerControllerBase = Cast<ALPPlayerController>(GetController()))

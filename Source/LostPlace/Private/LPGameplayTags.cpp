@@ -2,6 +2,7 @@
 
 
 #include "LPGameplayTags.h"
+
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 
@@ -188,27 +189,74 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 	
 	GameplayTags.Attributes_Resistance_Fire = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
-			FName("Resistance.Fire"),
+			FName("Attributes.Resistance.Fire"),
 			FString("火属性抗性")
 			);
 	
 	GameplayTags.Attributes_Resistance_Lightning = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
-			FName("Resistance.Lightning"),
+			FName("Attributes.Resistance.Lightning"),
 			FString("雷属性抗性")
 			);
 	
 	GameplayTags.Attributes_Resistance_Arcane = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
-			FName("Resistance.Arcane"),
+			FName("Attributes.Resistance.Arcane"),
 			FString("魔法伤害抗性")
 			);
 	
 	GameplayTags.Attributes_Resistance_Physical = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
-			FName("Resistance.Physical"),
+			FName("Attributes.Resistance.Physical"),
 			FString("物理伤害抗性")
 		);
+	/*
+	 * 负面标签注册
+	*/
+	GameplayTags.DeBuff_Burn = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Burn"),
+			FString("火属性燃烧负面标签")
+			);
+	GameplayTags.DeBuff_Stun = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Stun"),
+			FString("雷属性眩晕负面标签")
+			);
+	GameplayTags.DeBuff_Arcane = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Arcane"),
+			FString("魔法属性负面标签")
+			);
+	GameplayTags.DeBuff_Physical = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Physical"),
+			FString("物理属性流血负面标签")
+			);
+	/*
+ * 负面效果配置标签
+*/
+	GameplayTags.DeBuff_Chance = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Chance"),
+			FString("负面效果 触发几率")
+			);
+	GameplayTags.DeBuff_Damage = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Damage"),
+			FString("负面效果 伤害")
+			);
+	GameplayTags.DeBuff_Duration = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Duration"),
+			FString("负面效果 持续时间")
+			);
+	GameplayTags.DeBuff_Frequency = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("DeBuff.Frequency"),
+			FString("负面效果 触发间隔")
+			);
+
 
 	/**
 	 * 元属性
@@ -224,6 +272,14 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResistance.Add(GameplayTags.Damage_Lightning, GameplayTags.Attributes_Resistance_Lightning);
 	GameplayTags.DamageTypesToResistance.Add(GameplayTags.Damage_Arcane, GameplayTags.Attributes_Resistance_Arcane);
 	GameplayTags.DamageTypesToResistance.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
+
+	/*
+	 * 负面标签和属性抵抗标签对于对应
+	*/
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Fire, GameplayTags.DeBuff_Burn);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Lightning, GameplayTags.DeBuff_Stun);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Arcane, GameplayTags.DeBuff_Arcane);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Physical, GameplayTags.DeBuff_Physical);
 
 	/* 效果标签 */
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get()

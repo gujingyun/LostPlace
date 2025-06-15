@@ -39,37 +39,9 @@ void ULPProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation
 		GetOwningActorFromActorInfo(),
 		Cast<APawn>(GetOwningActorFromActorInfo()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	//创建一个GE的实例，并设置给投射物
-	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
-
-	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-	EffectContextHandle.SetAbility(this); //设置技能
-	EffectContextHandle.AddSourceObject(Projectile); //设置GE的源
-	//添加Actor列表
-	TArray<TWeakObjectPtr<AActor>> Actors;
-	Actors.Add(Projectile);
-	EffectContextHandle.AddActors(Actors);
-	//添加命中结果
-	FHitResult HitResult;
-	HitResult.Location = ProjectileTargetLocation;
-	EffectContextHandle.AddHitResult(HitResult);
-	//添加技能触发位置
-	EffectContextHandle.AddOrigin(ProjectileTargetLocation);
-
-	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
 	
-	const FLPGameplayTags GameplayTags = FLPGameplayTags::Get(); //获取标签单例
-
-	// const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel()+10); //根据等级获取技能伤害
-	// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("火球术伤害：%f"), ScaledDamage));
-	for (auto & Pair : DamageTypes)
-	{
-		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle,Pair.Key,ScaledDamage);
-	}
-	
-	
-	Projectile->DamageEffectHandle = SpecHandle;
+	FDamageEffectParams DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
+	Projectile->DamageEffectParams = DamageEffectParams;
 	//确保变换设置被正确应用
 	Projectile->FinishSpawning(SpawnTransform);
 }

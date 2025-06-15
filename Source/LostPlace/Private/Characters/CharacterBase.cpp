@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "LPGameplayTags.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "LostPlace/LostPlace.h"
@@ -13,6 +14,11 @@ ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
+	BurnDebuffComponent->SetupAttachment(GetRootComponent());
+	BurnDebuffComponent->DeBuffTag = FLPGameplayTags::Get().DeBuff_Burn;
+	
+	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore); //设置可视为阻挡
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore); 
@@ -33,11 +39,11 @@ UAnimMontage* ACharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void ACharacterBase::Die()
+void ACharacterBase::Die(const FVector& DeathImpulse)
 {
 	//将武器从角色身上分离
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
-	MulticastHandleDeath();
+	MulticastHandleDeath(DeathImpulse);
 }
 
 FVector ACharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag MontageTag)
@@ -64,7 +70,7 @@ FVector ACharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTa
 
 
 
-void ACharacterBase::MulticastHandleDeath_Implementation()
+void ACharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
 	//播放死亡音效
 	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
@@ -73,16 +79,19 @@ void ACharacterBase::MulticastHandleDeath_Implementation()
 	Weapon->SetEnableGravity(true); //开启重力效果
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly); //开启物理碰撞通道
 
+	
 	//开启角色物理效果
 	GetMesh()->SetSimulatePhysics(true); //开启模拟物理效果
 	GetMesh()->SetEnableGravity(true); //开启重力效果
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly); //开启物理碰撞通道
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); //开启角色与静态物体产生碰撞
-
+	GetMesh()->AddImpulse(DeathImpulse, NAME_None, true);
+	
 	//关闭角色碰撞体碰撞通道，避免其对武器和角色模拟物理效果产生影响
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
 	bDead = true;
+	OnDeath.Broadcast(this);
 }
 
 
@@ -200,6 +209,16 @@ void ACharacterBase::IncrementMinionCount_Implementation(const int32 Amount)
 ECharacterClass ACharacterBase::GetCharacterClass_Implementation()
 {
 	return CharacterClass;
+}
+
+FOnASCRegistered& ACharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnASCRegistered;
+}
+
+FOnDeath& ACharacterBase::GetOnDeathDelegate()
+{
+	return OnDeath;
 }
 
 

@@ -1,8 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "LPAbilityTypes.h"
+#include "LPGameplayTags.h"
 #include "Core/LPGameMode.h"
 #include "Engine/OverlapResult.h"
 #include "Interface/CombatInterface.h"
@@ -164,9 +167,115 @@ void ULPAbilitySystemLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& Eff
 	}
 }
 
+bool ULPAbilitySystemLibrary::IsSuccessfulDeBuff(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->IsSuccessfulDeBuff();
+	}
+	return false;
+}
+
+float ULPAbilitySystemLibrary::GetDeBuffDamage(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetDeBuffDamage();
+	}
+	return 0.f;
+}
+
+float ULPAbilitySystemLibrary::GetDeBuffDuration(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetDeBuffDuration();
+	}
+	return 0.f;
+}
+
+float ULPAbilitySystemLibrary::GetDeBuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+
+		return LPEffectContext->GetDeBuffFrequency();
+	}
+	return 0.f;
+}
+
+FGameplayTag ULPAbilitySystemLibrary::GetDamageType(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		if (LPEffectContext->GetDamageType().IsValid())
+		{
+			return *LPEffectContext->GetDamageType();
+		}
+	}
+	return FGameplayTag();
+}
+
+void ULPAbilitySystemLibrary::SetIsSuccessfulDeBuff(FGameplayEffectContextHandle& EffectContextHandle,
+	bool bInIsSuccessfulDeBuff)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetIsSuccessfulDeBuff(bInIsSuccessfulDeBuff);
+	}
+}
+
+void ULPAbilitySystemLibrary::SetDeBuff(FGameplayEffectContextHandle& EffectContextHandle, FGameplayTag& InDamageType,
+	float InDamage, float InDuration, float InFrequency)
+{
+	FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get());
+	//通过标签创建一个共享指针
+	const TSharedPtr<FGameplayTag> DamageType = MakeShared<FGameplayTag>(InDamageType);
+	LPEffectContext->SetDamageType(DamageType);
+	LPEffectContext->SetDeBuffDamage(InDamage);
+	LPEffectContext->SetDeBuffDuration(InDuration);
+	LPEffectContext->SetDeBuffFrequency(InFrequency);
+}
+
+FVector ULPAbilitySystemLibrary::GetDeathImpulse(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetDeathImpulse();
+	}
+	return FVector::ZeroVector;
+}
+
+void ULPAbilitySystemLibrary::SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle,
+	const FVector& bInDeathImpulse)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetDeathImpulse(bInDeathImpulse);
+	}
+}
+
+FVector ULPAbilitySystemLibrary::GetKnockbackForce(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetKnockbackForce();
+	}
+	return FVector::ZeroVector;
+}
+
+void ULPAbilitySystemLibrary::SetKnockbackForce(FGameplayEffectContextHandle& EffectContextHandle,
+	const FVector& InForce)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetKnockbackForce(InForce);
+	}
+}
+
 void ULPAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject,
-	TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
-	const FVector& SphereOrigin)
+                                                         TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
+                                                         const FVector& SphereOrigin)
 {
 	FCollisionQueryParams SphereParams; //创建一个碰撞查询的配置
 	SphereParams.AddIgnoredActors(ActorsToIgnore); //添加忽略的Actor
@@ -218,4 +327,26 @@ int32 ULPAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* WorldC
 	const float XPReward = ClassDefaultInfo.XPReward.GetValueAtLevel(CharacterLevel);
 
 	return static_cast<int32>(XPReward);
+}
+
+FGameplayEffectContextHandle ULPAbilitySystemLibrary::ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams)
+{
+	FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
+	const AActor* SourceActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(SourceActor);
+	SetDeathImpulse(EffectContextHandle, DamageEffectParams.DeathImpulse);
+	SetKnockbackForce(EffectContextHandle, DamageEffectParams.KnockbackForce);
+	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
+
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType, DamageEffectParams.BaseDamage);
+
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.DeBuff_Chance, DamageEffectParams.DeBuffChance);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.DeBuff_Damage, DamageEffectParams.DeBuffDamage);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.DeBuff_Duration, DamageEffectParams.DeBuffDuration);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.DeBuff_Frequency, DamageEffectParams.DeBuffFrequency);
+	
+	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	
+	return EffectContextHandle;
 }

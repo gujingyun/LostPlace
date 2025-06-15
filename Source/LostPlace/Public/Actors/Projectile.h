@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayEffectTypes.h"
+#include "LPAbilityTypes.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraSystem.h"
 #include "Projectile.generated.h"
 
+struct FDamageEffectParams;
 class UProjectileMovementComponent;
 class USphereComponent;
 
@@ -30,7 +31,7 @@ public:
 	TObjectPtr<UAudioComponent> LoopingSoundComponent;
 
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = true)) //蓝图可读写，创建时需要将接口暴露出来方便设置
-	FGameplayEffectSpecHandle DamageEffectHandle;
+	FDamageEffectParams DamageEffectParams;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -55,7 +56,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USoundBase> LoopingSound;
 	
-	void PlayImpact() const;
+	void OnHit();
 
 	//此物体的存在时间
 	UPROPERTY(EditDefaultsOnly)
