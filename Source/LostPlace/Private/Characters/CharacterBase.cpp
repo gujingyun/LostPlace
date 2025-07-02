@@ -7,8 +7,10 @@
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "LostPlace/LostPlace.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
@@ -17,7 +19,10 @@ ACharacterBase::ACharacterBase()
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DeBuffTag = FLPGameplayTags::Get().DeBuff_Burn;
-	
+
+	StunDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("StunDebuffComponent");
+	StunDebuffComponent->SetupAttachment(GetRootComponent());
+	StunDebuffComponent->DeBuffTag = FLPGameplayTags::Get().DeBuff_Stun;
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore); //设置可视为阻挡
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
@@ -31,6 +36,15 @@ ACharacterBase::ACharacterBase()
 	
 
 
+}
+
+void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACharacterBase, bIsStunned);
+	DOREPLIFETIME(ACharacterBase, bIsBurned);
+	DOREPLIFETIME(ACharacterBase, IsBeingShocked);
 }
 
 
@@ -91,9 +105,33 @@ void ACharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImp
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
 	bDead = true;
+	BurnDebuffComponent->Deactivate();
+	StunDebuffComponent->Deactivate();
 	OnDeath.Broadcast(this);
 }
 
+
+void ACharacterBase::DeBuffRegisterChanged()
+{
+	//监听眩晕标签变动
+	AbilitySystemComponent->RegisterGameplayTagEvent(FLPGameplayTags::Get().DeBuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ACharacterBase::StunTagChanged);
+}
+
+void ACharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	//如果有眩晕标签，设置角色不能移动
+	bIsStunned = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
+}
+
+void ACharacterBase::OnRep_Stunned()
+{
+	
+}
+
+void ACharacterBase::OnRep_Burned()
+{
+}
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
@@ -219,6 +257,21 @@ FOnASCRegistered& ACharacterBase::GetOnASCRegisteredDelegate()
 FOnDeath& ACharacterBase::GetOnDeathDelegate()
 {
 	return OnDeath;
+}
+
+USkeletalMeshComponent* ACharacterBase::GetWeapon_Implementation()
+{
+	return Weapon;
+}
+
+void ACharacterBase::SetIsBeingShocked_Implementation(bool bInShock)
+{
+	IsBeingShocked = bInShock;
+}
+
+bool ACharacterBase::IsBeingShocked_Implementation() const
+{
+	return IsBeingShocked;
 }
 
 

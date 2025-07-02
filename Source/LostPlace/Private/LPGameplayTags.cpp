@@ -151,8 +151,12 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			FName("InputTag.Passive.2"),
 			FString("被动技能2")
 		);
-
-
+	GameplayTags.InputTag_I = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("InputTag.I"),
+			FString("I键打开背包")
+		);
+	
 	
 	GameplayTags.Damage = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
@@ -295,6 +299,7 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.None"),
 		FString("无能力")
 	);
+	
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get()
 		.AddNativeGameplayTag(
 			FName("Abilities.Attack"),
@@ -423,6 +428,29 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			);
 
 
+	/*
+	 * 阻止相关鼠标事件的触发标签
+	*/
+	GameplayTags.Player_Block_InputPressed = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("Player.Block.InputPressed"),
+			FString("阻挡键位按下输入")
+			);
+	GameplayTags.Player_Block_InputHold = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("Player.Block.InputHold"),
+			FString("阻挡键位悬停输入")
+			);
+	GameplayTags.Player_Block_InputReleased = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("Player.Block.InputReleased"),
+			FString("阻挡键位抬起输入")
+			);
+	GameplayTags.Player_Block_CursorTrace = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("Player.Block.CursorTrace"),
+			FString("阻挡鼠标拾取事件")
+			);
 
 
 }

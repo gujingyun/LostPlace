@@ -8,6 +8,7 @@
 #include "LPGameplayTags.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
 #include "Input/InputComponentBase.h"
@@ -24,16 +25,25 @@ ALPPlayerController::ALPPlayerController()
 }
 void ALPPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
+	{
+		return;
+	}
 	if(InputTag.MatchesTagExact(FLPGameplayTags::Get().InputTag_LMB))
 	{
 		bTargeting = ThisActor != nullptr; //ThisActor为鼠标悬停在敌人身上才会有值
 		bAutoRunning = false;
 		FollowTime = 0.f; //重置统计的时间
 	}
+	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 }
 
 void ALPPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputReleased))
+	{
+		return;
+	}
 	if (!InputTag.MatchesTagExact(FLPGameplayTags::Get().InputTag_LMB))
 	{
 		if (GetASC())
@@ -66,12 +76,21 @@ void ALPPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true; //设置当前正常自动寻路状态，将在tick中更新位置
 				}
 			}
+			if (GetASC() && !GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			}
+			
 		}
 	}
 }
 
 void ALPPlayerController::AbilityInputTagHold(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputHold))
+	{
+		return;
+	}
 	if (!InputTag.MatchesTagExact(FLPGameplayTags::Get().InputTag_LMB))
 	{
 		if (GetASC())
@@ -162,6 +181,11 @@ void ALPPlayerController::SetupInputComponent()
 
 void ALPPlayerController::Move(const FInputActionValue& Value)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
+	{
+		return;
+	}
+	Spline->ClearSplinePoints();
 	const FVector2D InputAxisVector = Value.Get<FVector2D>(); //获取输入操作的2维向量值
 	const FRotator Rotation = GetControlRotation(); //获取控制器旋转
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f); //通过控制器的垂直朝向创建一个旋转值，忽略上下朝向和左右朝向
@@ -227,6 +251,14 @@ void ALPPlayerController::AutoRun()
 //鼠标位置追踪
 void ALPPlayerController::CursorTrace()
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		if (LastActor) LastActor->UnHighlightActor();
+		if (ThisActor) ThisActor->UnHighlightActor();
+		LastActor = nullptr;
+		ThisActor = nullptr;
+		return;
+	}
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit); //获取可视的鼠标命中结果
 	if(!CursorHit.bBlockingHit) return; //如果未命中直接返回
 

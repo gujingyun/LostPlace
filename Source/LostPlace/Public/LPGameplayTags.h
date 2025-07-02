@@ -11,6 +11,7 @@
  */
 struct FLPGameplayTags
 {
+
 public:
 	static const FLPGameplayTags& Get() { return GameplayTags; }
 	static void InitializeNativeGameplayTags();
@@ -53,7 +54,7 @@ public:
 	FGameplayTag InputTag_4; //4键
 	FGameplayTag InputTag_Passive_1; //被动技能1
 	FGameplayTag InputTag_Passive_2; //被动技能2
-
+	FGameplayTag InputTag_I; //I键
 
 	
 	FGameplayTag Damage; //伤害 标签
@@ -116,6 +117,11 @@ public:
 
 	FGameplayTag Effects_HitReact; //受击 标签
 	
+	//阻止输入相关事件触发
+	FGameplayTag Player_Block_InputPressed; //阻挡键位按下输入
+	FGameplayTag Player_Block_InputHold; //阻挡键位悬停输入
+	FGameplayTag Player_Block_InputReleased; //阻挡键位抬起输入
+	FGameplayTag Player_Block_CursorTrace; //阻挡鼠标拾取事件
 
 
 

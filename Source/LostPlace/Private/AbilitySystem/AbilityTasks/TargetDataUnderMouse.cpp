@@ -3,6 +3,7 @@
 
 #include "LostPlace/Public/AbilitySystem/AbilityTasks/TargetDataUnderMouse.h"
 #include "AbilitySystemComponent.h"
+#include "LostPlace/LostPlace.h"
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility)
 {
@@ -45,7 +46,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	//获取鼠标拾取结果
 	APlayerController* PlayerController = Ability->GetCurrentActorInfo()->PlayerController.Get();
 	FHitResult CursorResult;
-	PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, CursorResult);
+	PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorResult);
 	
 	//创建TargetData句柄，上传到服务器端需要上传句柄
 	FGameplayAbilityTargetDataHandle DataHandle;

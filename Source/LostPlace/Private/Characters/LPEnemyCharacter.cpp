@@ -35,6 +35,7 @@ ALPEnemyCharacter::ALPEnemyCharacter()
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent()); //将血条附件到根节点上
 
+	BaseWalkSpeed = 250.f;
 }
 
 void ALPEnemyCharacter::PossessedBy(AController* NewController)
@@ -114,13 +115,15 @@ void ALPEnemyCharacter::InitAbilityActorInfo()
 		InitDefaultAttributes();
 	}
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
-	
+	//注册监听负面标签变动
+	DeBuffRegisterChanged();
 }
 
 void ALPEnemyCharacter::InitDefaultAttributes() const
 {
 	ULPAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
+
 
 void ALPEnemyCharacter::HighlightActor()
 {
@@ -158,6 +161,14 @@ void ALPEnemyCharacter::Die(const FVector& DeathImpulse)
 	SetLifeSpan(LifeSpan);
 	if (LPAIController)	LPAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Dead"), true);
 	Super::Die(DeathImpulse);
+}
+void ALPEnemyCharacter::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+	if (LPAIController && LPAIController->GetBlackboardComponent())
+	{
+		LPAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Stunned"), bIsStunned);
+	}
 }
 
 

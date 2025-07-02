@@ -124,4 +124,43 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
 
+	/**
+	 * 这个函数根据传入的值计算均匀分布的多段角度，
+	 *
+	 * @param Forward 正前方向
+	 * @param Axis 基于旋转的轴
+	 * @param Spread 角度范围
+	 * @param NumRotators 分段数
+	 *
+	 * @return TArray<FRotator&> 返回每段角度的中间角度的数组
+	 *
+	 * @note 这个函数用于在技能生成投掷物的函数逻辑中。
+	 */
+	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayMechanics")
+	static TArray<FRotator> EvenlySpacedRotators(const FVector& Forward, const FVector & Axis, float Spread, int32 NumRotators);
+
+	/**
+	 * 这个函数根据传入的值计算均匀分布的多段朝向
+	 *
+	 * @param Forward 正前方向
+	 * @param Axis 基于旋转的轴
+	 * @param Spread 角度范围
+	 * @param NumVectors 分段数
+	 *
+	 * @return TArray<FVector&> 返回每段角度的中间角度的朝向数组
+	 *
+	 * @note 这个函数用于在技能生成投掷物的函数逻辑中。
+	 */
+	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayMechanics")
+	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward, const FVector & Axis, float Spread, int32 NumVectors);
+	/**
+	 * 获取距离目标位置最近的几个目标
+	 * @param MaxTargets 获取最大目标的数量
+	 * @param Actors 需要计算的目标数组
+	 * @param OutClosestTargets 返回获取到的最近的目标
+	 * @param Origin 计算的位置
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayMechanics")
+	static void GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin);
+
 };

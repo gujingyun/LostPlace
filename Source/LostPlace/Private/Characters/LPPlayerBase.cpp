@@ -2,8 +2,11 @@
 
 
 #include "Characters/LPPlayerBase.h"
+
+#include "LPGameplayTags.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/LPPlayerState.h"
 #include "Player/LPPlayerController.h"
@@ -69,6 +72,9 @@ void ALPPlayerBase::InitAbilityActorInfo()
 	Cast<UAbilitySystemComponentBase>(PlayerStateBase->GetAbilitySystemComponent())->AbilityActorInfoSet();
 
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
+
+	//注册监听负面标签变动
+	DeBuffRegisterChanged();
 	
 	//获取PC
 	if(ALPPlayerController* PlayerControllerBase = Cast<ALPPlayerController>(GetController()))
@@ -83,6 +89,40 @@ void ALPPlayerBase::InitAbilityActorInfo()
 }
 
 
+void ALPPlayerBase::OnRep_Stunned()
+{
+	if (UAbilitySystemComponentBase* LPASC = Cast<UAbilitySystemComponentBase>(AbilitySystemComponent))
+	{
+		const FLPGameplayTags& GameplayTags = FLPGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputHold);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+		if (bIsStunned)
+		{
+			LPASC->AddLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Activate();
+		}
+		else
+		{
+			LPASC->RemoveLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Deactivate();
+		}
+	}
+}
+
+void ALPPlayerBase::OnRep_Burned()
+{
+	if (bIsBurned)
+	{
+		BurnDebuffComponent->Activate();
+	}
+	else
+	{
+		BurnDebuffComponent->Deactivate();
+	}
+}
 
 // Called when the game starts or when spawned
 void ALPPlayerBase::BeginPlay()

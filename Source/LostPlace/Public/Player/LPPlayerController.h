@@ -10,6 +10,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Interface/EnemyInterface.h"
 #include "LPPlayerController.generated.h"
+class UNiagaraSystem;
 class UInputConfig;
 class UInputMappingContext;
 class UInputAction;
@@ -105,6 +106,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline; //自动寻路时生成的样条线
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
+	
 	void AutoRun();
 
 	UPROPERTY(EditDefaultsOnly)

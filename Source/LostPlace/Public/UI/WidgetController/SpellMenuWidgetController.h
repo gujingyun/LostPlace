@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "LPGameplayTags.h"
+#include "GameplayTagContainer.h"
 #include "LPWidgetController.h"
-#include "SpellMenuWidgetController.generated.h"
 
+#include "SpellMenuWidgetController.generated.h"
 struct FLPGameplayTags;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FSpellGlobeSelectedSignature, bool, bSpendPointsEnabled, bool,bEquipEnabled, FString, SpellDescription, FString, SpellNextLevelDescription);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWaitForEquipSelectionSignature, const FGameplayTag& ,AbilityType);
@@ -69,7 +71,10 @@ private:
 	//通过技能状态标签和可分配技能点数来获取技能是否可以装配和技能是否可以升级
 	static void ShouldEnableButtons(const FGameplayTag& AbilityStatus,int32 SpellPoints, bool& bShouldEnableSpellPoints, bool& bShouldEnableEquipButton);
 	//设置选中技能默认值
-	FSelectedAbility SelectedAbility = {FLPGameplayTags::Get().Abilities_None, FLPGameplayTags::Get().Abilities_Status_Locked};
+	FSelectedAbility SelectedAbility = {
+		// FLPGameplayTags::Get().Abilities_None, 
+		// FLPGameplayTags::Get().Abilities_Status_Locked
+	};
 	//保存当前技能可分配点数
 	int32 CurrentSpellPoints = 0;
 

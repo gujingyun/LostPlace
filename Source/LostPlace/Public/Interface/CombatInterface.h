@@ -99,4 +99,28 @@ public:
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0; //获取ASC注册成功后的委托
 	virtual FOnDeath& GetOnDeathDelegate() = 0; //获取死亡委托
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetInShockLoop(bool bInLoop);
+
+	/**
+	 * 获取角色使用的武器指针
+	 * @return 武器骨骼网格体组件
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetWeapon();
+
+	/**
+ * 获取角色是否处于闪电链攻击状态
+ * @return 布尔值，如果处于返回true
+ */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool IsBeingShocked() const;
+
+	/**
+	 * 设置角色是否处于闪电链攻击状态
+	 * @param bInShock 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetIsBeingShocked(bool bInShock);
+
 };

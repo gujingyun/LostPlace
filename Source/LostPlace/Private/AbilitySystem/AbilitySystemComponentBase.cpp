@@ -46,13 +46,43 @@ void UAbilitySystemComponentBase::AddCharacterPassiveAbilities(
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 }
+void UAbilitySystemComponentBase::AbilityInputTagPressed(const FGameplayTag& InputTag)
+{
+	if (!InputTag.IsValid()) return;
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
+		{
+
+			AbilitySpecInputPressed(AbilitySpec);
+			if (AbilitySpec.IsActive())
+			{
+				FPredictionKey PredictionKey;
+				if (UGameplayAbility* AbilityInstance = AbilitySpec.GetPrimaryInstance())
+				{
+					PredictionKey = AbilityInstance->GetCurrentActivationInfo().GetActivationPredictionKey();
+				}else
+				{
+					TArray<UGameplayAbility*> Abilities = AbilitySpec.GetAbilityInstances();
+					if (Abilities.Num() > 0)
+					{
+						PredictionKey = Abilities[0]->GetCurrentActivationInfo().GetActivationPredictionKey();
+					}
+				}
+				// FPredictionKey PredictionKey = AbilitySpec.Ability.Get()->GetCurrentActivationInfo().GetActivationPredictionKey();
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed, AbilitySpec.Handle, PredictionKey);
+			}
+		}
+	}
+	
+}
 
 void UAbilitySystemComponentBase::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTag(InputTag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 		{
 
 			AbilitySpecInputPressed(AbilitySpec);
@@ -70,9 +100,25 @@ void UAbilitySystemComponentBase::AbilityInputTagReleased(const FGameplayTag& In
 	if (!InputTag.IsValid()) return;
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTag(InputTag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
+			FPredictionKey PredictionKey;
+			if (UGameplayAbility* AbilityInstance = AbilitySpec.GetPrimaryInstance())
+			{
+				PredictionKey = AbilityInstance->GetCurrentActivationInfo().GetActivationPredictionKey();
+			}else
+			{
+				TArray<UGameplayAbility*> Abilities = AbilitySpec.GetAbilityInstances();
+				if (Abilities.Num() > 0)
+				{
+					PredictionKey = Abilities[0]->GetCurrentActivationInfo().GetActivationPredictionKey();
+				}
+			}
+			// FPredictionKey PredictionKey = AbilitySpec.Ability.Get()->GetCurrentActivationInfo().GetActivationPredictionKey();
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, 
+								AbilitySpec.Handle, 
+								PredictionKey);
 		}
 	}
 }

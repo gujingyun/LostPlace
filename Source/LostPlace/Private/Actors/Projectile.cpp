@@ -42,6 +42,7 @@ void AProjectile::BeginPlay()
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnSphereOverlap);
 	//设置此物体的存在时间
 	SetLifeSpan(LifeSpan);
+	SetReplicateMovement(true);
 	
 	//添加一个音效，并附加到根组件上面，在技能移动时，声音也会跟随移动
 	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
@@ -63,6 +64,7 @@ void AProjectile::OnHit()
 	if (LoopingSoundComponent)
 	{
 		LoopingSoundComponent->Stop();
+		LoopingSoundComponent->DestroyComponent();
 	}
 	bHit = true;
 }
@@ -70,6 +72,7 @@ void AProjectile::OnHit()
 void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (DamageEffectParams.SourceAbilitySystemComponent == nullptr) return;
 	AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
 
 	if (SourceAvatarActor == OtherActor) return;//如果是自己的话，直接返回

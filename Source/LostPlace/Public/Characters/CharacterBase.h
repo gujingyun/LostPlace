@@ -27,7 +27,8 @@ class LOSTPLACE_API ACharacterBase : public ACharacter, public IAbilitySystemInt
 public:
 	// Sets default values for this character's properties
 	ACharacterBase();
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override; //覆盖虚函数获取asc
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; } //获取as
 	/* ICombatInterface战斗接口 */
@@ -50,7 +51,12 @@ public:
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
 	
 	virtual FOnDeath& GetOnDeathDelegate() override;
-	
+
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() override;
+
+	virtual void SetIsBeingShocked_Implementation(bool bInShock) override;
+	virtual bool IsBeingShocked_Implementation() const override;
+
 	/* ICombatInterface战斗接口 结束 */
 
 	FOnASCRegistered OnASCRegistered; //ASC注册成功委托
@@ -67,8 +73,32 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="战斗")
 	TArray<FTaggedMontage> AttackMontage;
+	
+	//当前角色是否处于眩晕状态
+	UPROPERTY(ReplicatedUsing=OnRep_Burned, BlueprintReadOnly)
+	bool bIsBurned = false;
+	
+	//当前角色是否处于眩晕状态
+	UPROPERTY(ReplicatedUsing=OnRep_Stunned, BlueprintReadOnly)
+	bool bIsStunned = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool IsBeingShocked = false;
+	
+	//注册用于监听负面标签变动的函数
+	void DeBuffRegisterChanged();
 
 
+	//当前角色的最大移动速度
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
+	float BaseWalkSpeed = 600.f;
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+	
+	UFUNCTION()
+	virtual void OnRep_Burned();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -90,6 +120,8 @@ protected:
 	
 	bool bDead = false; //是否死亡
 
+	//眩晕标签变动后的回调
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 
 
@@ -144,6 +176,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category="战斗")
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+
+	UPROPERTY(VisibleAnywhere, Category="战斗")
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

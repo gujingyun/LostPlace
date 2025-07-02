@@ -141,9 +141,13 @@ void UAttributeSetBase::HandleIncomingDamage(const FEffectProperties& Props)
 		}
 		else
 		{
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FLPGameplayTags::Get().Effects_HitReact);
-			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer); //根据tag标签激活技能
+			if (Props.TargetCharacter->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FLPGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer); //根据tag标签激活技能
+			}
+			
 			//处理击退
 			const FVector& KnockbackForce = ULPAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
 			if (!KnockbackForce.IsNearlyZero(1.f))
@@ -225,7 +229,17 @@ void UAttributeSetBase::HandleDeBuff(const FEffectProperties& Props)
 	// Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]); //设置GE的阻塞标签
 	UTargetTagsGameplayEffectComponent& TargetTagsGameplayEffectComponent = Effect->AddComponent<UTargetTagsGameplayEffectComponent>();
 	FInheritedTagContainer InheritableOwnedTagsContainer = TargetTagsGameplayEffectComponent.GetConfiguredTargetTagChanges(); //获取到标签容器
-	InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]); //添加标签
+	const FGameplayTag DebuffTag = GameplayTags.DamageTypesToDebuffs[DamageType]; //获取到对应的debuff标签
+	InheritableOwnedTagsContainer.AddTag(DebuffTag); //添加标签
+
+	if (DebuffTag.MatchesTagExact(GameplayTags.DeBuff_Stun))
+	{
+		InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_CursorTrace);
+		InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputHold);
+		InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputPressed);
+		InheritableOwnedTagsContainer.AddTag(GameplayTags.Player_Block_InputReleased); 
+	}
+	
 	TargetTagsGameplayEffectComponent.SetAndApplyTargetTagChanges(InheritableOwnedTagsContainer); //应用并更新
 	
 	// Effect->bExecutePeriodicEffectOnApplication = false; //在应用后不会立即触发，而是在经过了Period后才会触发
@@ -293,6 +307,7 @@ void UAttributeSetBase::SendXPEvent(const FEffectProperties& Props)
 }
 void UAttributeSetBase::ShowFloatingText(const FEffectProperties& Props, float Damage,bool bBlockedHit,bool bCriticalHit) const
 {
+	if (Props.SourceCharacter == nullptr) return;
 	//调用显示伤害数字
 	if(Props.SourceCharacter != Props.TargetCharacter)
 	{

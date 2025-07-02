@@ -350,3 +350,91 @@ FGameplayEffectContextHandle ULPAbilitySystemLibrary::ApplyDamageEffect(const FD
 	
 	return EffectContextHandle;
 }
+TArray<FRotator> ULPAbilitySystemLibrary::EvenlySpacedRotators(const FVector& Forward, const FVector& Axis, float Spread, int32 NumRotators)
+{
+	TArray<FRotator> Rotators;
+	
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis); //获取到最左侧的角度
+	
+	if(NumRotators > 1)
+	{
+		const float DeltaSpread = Spread / NumRotators; //技能分的段数
+
+		for(int32 i=0; i<NumRotators; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * (i + 0.5f), Axis); //获取当前分段的角度
+			Rotators.Add(Direction.Rotation());
+		}
+	}
+	else
+	{
+		//如果只需要一个，则将朝向放入即可
+		Rotators.Add(Forward.Rotation());
+	}
+
+	return Rotators;
+}
+
+TArray<FVector> ULPAbilitySystemLibrary::EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, float Spread, int32 NumVectors)
+{
+	TArray<FVector> Vectors;
+	
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis); //获取到最左侧的角度
+	
+	if(NumVectors > 1)
+	{
+		const float DeltaSpread = Spread / NumVectors; //技能分的段数
+
+		for(int32 i=0; i<NumVectors; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * (i + 0.5f), Axis); //获取当前分段的角度
+			Vectors.Add(Direction);
+		}
+	}
+	else
+	{
+		//如果只需要一个，则将朝向放入即可
+		Vectors.Add(Forward);
+	}
+
+	return Vectors;
+}
+
+void ULPAbilitySystemLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors,
+	TArray<AActor*>& OutClosestTargets, const FVector& Origin)
+{
+	//如果数量过于少，直接返回原数组
+	if(Actors.Num() <= MaxTargets)
+	{
+		OutClosestTargets = Actors;
+		return;
+	}
+
+	TArray<AActor*> ActorsToCheck = Actors; //没有引用就是复制，复制一份用于遍历
+	int32 NumTargetFound = 0; //当前已经遍历出最近距离的个数
+
+	//循环遍历，直到获得足够数量的目标时停止
+	while (NumTargetFound < MaxTargets)
+	{
+		if(ActorsToCheck.Num() == 0) break; //如果没有可遍历内容，将跳出循环
+		double ClosestDistance = TNumericLimits<double>::Max(); //记录中心于目标的位置，如果有更小的将被替换，默认是最大
+		AActor* ClosestActor; //缓存当前最近距离的目标
+		for(AActor* PotentialTarget : ActorsToCheck)
+		{
+			//获取目标和中心的距离
+			const double Distance = (PotentialTarget->GetActorLocation() - Origin).Length();
+
+			//比对当前计算的位置是否小于缓存的位置
+			if(Distance < ClosestDistance)
+			{
+				//如果小于，将替换对应信息
+				ClosestDistance = Distance;
+				ClosestActor = PotentialTarget;
+			}
+		}
+		
+		ActorsToCheck.Remove(ClosestActor); //从遍历数组中删除缓存的对象
+		OutClosestTargets.AddUnique(ClosestActor); //添加到返回的数组中
+		++ NumTargetFound; //递增数量
+	}
+}
