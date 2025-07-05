@@ -72,8 +72,8 @@ private:
 	static void ShouldEnableButtons(const FGameplayTag& AbilityStatus,int32 SpellPoints, bool& bShouldEnableSpellPoints, bool& bShouldEnableEquipButton);
 	//设置选中技能默认值
 	FSelectedAbility SelectedAbility = {
-		// FLPGameplayTags::Get().Abilities_None, 
-		// FLPGameplayTags::Get().Abilities_Status_Locked
+		FLPGameplayTags::Get().Abilities_None, 
+		FLPGameplayTags::Get().Abilities_Status_Locked
 	};
 	//保存当前技能可分配点数
 	int32 CurrentSpellPoints = 0;

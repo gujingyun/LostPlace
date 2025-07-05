@@ -6,6 +6,7 @@
 #include "LPGameplayTags.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,7 +15,7 @@
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
@@ -34,6 +35,15 @@ ACharacterBase::ACharacterBase()
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponHandSocket"));//设置武器的位置
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);//设置武器的碰撞
 	
+	//实例化被动技能组件，并挂载
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>("EffectAttachPoint");
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	HaloOfProtectionNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("HaloOfProtectionComponent");
+	HaloOfProtectionNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	LifeSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("LifeSiphonComponent");
+	LifeSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	ManaSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("ManaSiphonComponent");
+	ManaSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
 
 
 }
@@ -279,5 +289,7 @@ bool ACharacterBase::IsBeingShocked_Implementation() const
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//防止特效跟随人物旋转，每一帧更新修改旋转为默认
+	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
 }
 

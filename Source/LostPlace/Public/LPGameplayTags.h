@@ -84,6 +84,10 @@ public:
 
 	FGameplayTag Abilities_HitReact; //受击技能标签
 
+
+
+
+	
 	FGameplayTag Abilities_Status_Locked; //技能状态 已锁定
 	FGameplayTag Abilities_Status_Eligible; //技能状态 可解锁
 	FGameplayTag Abilities_Status_Unlocked; //技能状态 已解锁
@@ -97,6 +101,12 @@ public:
 	FGameplayTag Abilities_Fire_FireBolt; //火球术技能标签
 	FGameplayTag Abilities_Lightning_Electrocute; //雷击技能标签
 
+	FGameplayTag Abilities_Passive_HaloOfProtection; //被动技能-守护光环
+	FGameplayTag Abilities_Passive_LifeSiphon; //被动技能-生命回复
+	FGameplayTag Abilities_Passive_ManaSiphon; //被动技能-蓝量回复
+
+
+	
 	FGameplayTag Cooldown_Fire_FireBolt; //火球术冷却标签
 
 

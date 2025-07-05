@@ -126,7 +126,7 @@ void USpellMenuWidgetController::EquipButtonPressed()
 
 	if (SelectedStatus.MatchesTag(FLPGameplayTags::Get().Abilities_Status_Equipped))
 	{
-		SelectedSlot = GetLPASC()->GetInputTagFromAbilityTag(SelectedAbility.Ability);
+		SelectedSlot = GetLPASC()->GetSlotFromAbilityTag(SelectedAbility.Ability);
 	}
 	
 }

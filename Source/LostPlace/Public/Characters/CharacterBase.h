@@ -12,6 +12,7 @@
 #include "Interface/CombatInterface.h"
 #include "CharacterBase.generated.h"
 
+class UPassiveNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
@@ -191,4 +192,21 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "战斗")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	//光环被动技能特效组件
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraComponent;
+
+	//回血被动技能特效组件
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraComponent;
+
+	//回蓝被动技能特效组件
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
+
+	//被动技能挂载的组件
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> EffectAttachComponent;
+
 };
