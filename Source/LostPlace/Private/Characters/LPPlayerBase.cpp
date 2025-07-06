@@ -246,6 +246,24 @@ int32 ALPPlayerBase::GetSpellPoints_Implementation() const
 	return PlayerStateBase->GetSpellPoints();
 }
 
+void ALPPlayerBase::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if(ALPPlayerController* PlayerControllerBase = Cast<ALPPlayerController>(GetController()))
+	{
+		PlayerControllerBase->ShowMagicCircle(DecalMaterial);
+		PlayerControllerBase->bShowMouseCursor = false;
+	}
+}
+
+void ALPPlayerBase::HideMagicCircle_Implementation() const
+{
+	if(ALPPlayerController* PlayerControllerBase = Cast<ALPPlayerController>(GetController()))
+	{
+		PlayerControllerBase->HideMagicCircle();
+		PlayerControllerBase->bShowMouseCursor = true;
+	}
+}
+
 int32 ALPPlayerBase::GetPlayerLevel_Implementation()
 {
 	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();

@@ -10,6 +10,11 @@ FString UGameplayAbilityBase::GetDescription(int32 Level)
 	return FString::Printf(TEXT("<Default>%s,</> <Level>%d</>"), L"默认技能名称 - 火球术火球术火球术火球术", Level);
 }
 
+FString UGameplayAbilityBase::GetDescriptionAtLevel(int32 Level, const FString& Title)
+{
+	return FString::Printf(TEXT("<Default>%s,</> <Level>%d</>"), L"默认技能名称 - 火球术火球术火球术火球术", Level);
+}
+
 FString UGameplayAbilityBase::GetNextLevelDescription(int32 Level)
 {
 	return FString::Printf(TEXT("<Default>下一等级：</><Level>%d</> 造成更多的伤害。"), Level);

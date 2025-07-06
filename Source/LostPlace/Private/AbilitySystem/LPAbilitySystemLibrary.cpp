@@ -273,6 +273,78 @@ void ULPAbilitySystemLibrary::SetKnockbackForce(FGameplayEffectContextHandle& Ef
 	}
 }
 
+bool ULPAbilitySystemLibrary::IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if(const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->IsRadialDamage();
+	}
+	return false;
+}
+
+float ULPAbilitySystemLibrary::GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if(const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetRadialDamageInnerRadius();
+	}
+	return 0.f;
+}
+
+float ULPAbilitySystemLibrary::GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if(const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetRadialDamageOuterRadius();
+	}
+	return 0.f;
+}
+
+FVector ULPAbilitySystemLibrary::GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+		if(const FLPGameplayEffectContext* LPEffectContext = static_cast<const FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return LPEffectContext->GetRadialDamageOrigin();
+	}
+	return FVector::ZeroVector;
+}
+
+void ULPAbilitySystemLibrary::SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle,
+	bool bInIsRadialDamage)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetIsRadialDamage(bInIsRadialDamage);
+	}
+}
+
+void ULPAbilitySystemLibrary::SetRadialDamageInnerRadius(FGameplayEffectContextHandle& EffectContextHandle,
+	float InRadialDamageInnerRadius)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetRadialDamageInnerRadius(InRadialDamageInnerRadius);
+	}
+}
+
+void ULPAbilitySystemLibrary::SetRadialDamageOuterRadius(FGameplayEffectContextHandle& EffectContextHandle,
+	float InRadialDamageOuterRadius)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetRadialDamageOuterRadius(InRadialDamageOuterRadius);
+	}
+}
+
+void ULPAbilitySystemLibrary::SetRadialDamageOrigin(FGameplayEffectContextHandle& EffectContextHandle,
+	const FVector& InRadialDamageOrigin)
+{
+	if (FLPGameplayEffectContext* LPEffectContext = static_cast<FLPGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		LPEffectContext->SetRadialDamageOrigin(InRadialDamageOrigin);
+	}
+}
+
 void ULPAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject,
                                                          TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, float Radius,
                                                          const FVector& SphereOrigin)
@@ -337,6 +409,13 @@ FGameplayEffectContextHandle ULPAbilitySystemLibrary::ApplyDamageEffect(const FD
 	EffectContextHandle.AddSourceObject(SourceActor);
 	SetDeathImpulse(EffectContextHandle, DamageEffectParams.DeathImpulse);
 	SetKnockbackForce(EffectContextHandle, DamageEffectParams.KnockbackForce);
+
+	//设置范围伤害相关配置
+	SetIsRadialDamage(EffectContextHandle, DamageEffectParams.bIsRadialDamage);
+	SetRadialDamageInnerRadius(EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius);
+	SetRadialDamageOuterRadius(EffectContextHandle, DamageEffectParams.RadialDamageOuterRadius);
+	SetRadialDamageOrigin(EffectContextHandle, DamageEffectParams.RadialDamageOrigin);
+	
 	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType, DamageEffectParams.BaseDamage);

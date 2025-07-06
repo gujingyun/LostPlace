@@ -29,7 +29,17 @@ public:
 	// Sets default values for this character's properties
 	ACharacterBase();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+	/**
+	 * 覆写 应用伤害给自身
+	 * @see https://www.unrealengine.com/blog/damage-in-ue4
+	 * @param DamageAmount		要施加的伤害数值
+	 * @param DamageEvent		描述伤害细节的结构体，支持不同类型的伤害，如普通伤害、点伤害（FPointDamageEvent）、范围伤害（FRadialDamageEvent）等。
+	 * @param EventInstigator	负责造成伤害的 Controller，通常是玩家或 AI 的控制器。
+	 * @param DamageCauser		直接造成伤害的 Actor，例如爆炸物、子弹或掉落的石头。
+	 * @return					返回实际应用的伤害值。这允许目标修改或减少伤害，然后将最终的值返回。
+	 */
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override; //覆盖虚函数获取asc
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; } //获取as
 	/* ICombatInterface战斗接口 */
@@ -58,11 +68,13 @@ public:
 	virtual void SetIsBeingShocked_Implementation(bool bInShock) override;
 	virtual bool IsBeingShocked_Implementation() const override;
 
+	virtual FOnDamageSignature& GetOnDamageDelegate() override;
+
 	/* ICombatInterface战斗接口 结束 */
 
 	FOnASCRegistered OnASCRegistered; //ASC注册成功委托
 	FOnDeath OnDeath; //角色死亡后触发的死亡委托
-
+	FOnDamageSignature OnDamageDelegate; //传入伤害后得到结果后的委托
 	
 	UPROPERTY(BlueprintReadOnly) //蓝图可读
 	bool bHighlighted = false; //是否高亮

@@ -1,0 +1,23 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "LPDamageGameplayAbility.h"
+#include "LPArcaneShardsAbility.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class LOSTPLACE_API ULPArcaneShardsAbility : public ULPDamageGameplayAbility
+{
+	GENERATED_BODY()
+public:
+	virtual FString GetDescription(int32 Level) override; //获取投射技能描述
+	virtual FString GetNextLevelDescription(int32 Level) override; //获取投射技能下一等级描述
+	virtual FString GetDescriptionAtLevel(int32 Level, const FString& Title) override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxNumShards = 11;
+};

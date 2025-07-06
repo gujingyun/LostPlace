@@ -321,6 +321,12 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Lightning.Electrocute"),
 		FString("电击技能标签")
 		);
+	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get()
+	.AddNativeGameplayTag(
+		FName("Abilities.Arcane.ArcaneShards"),
+		FString("奥术技能奥术爆发标签")
+		);
+
 	/*
 	 * 被动技能
 	*/

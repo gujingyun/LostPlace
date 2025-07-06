@@ -18,6 +18,7 @@ public:
 	FGameplayTag StartupInputTag;
 
 	virtual FString GetDescription(int32 Level); //获取当前等级的技能描述
+	virtual FString GetDescriptionAtLevel(int32 Level,const FString &Title);
 	virtual FString GetNextLevelDescription(int32 Level); //获取技能下一等级的技能描述
 	static  FString GetLockedDescription(int32 Level); //获取锁定技能描述
 

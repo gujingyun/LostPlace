@@ -57,6 +57,14 @@ void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACharacterBase, IsBeingShocked);
 }
 
+float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	const float DamageTaken = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageDelegate.Broadcast(DamageTaken);
+	return DamageTaken;
+}
+
 
 UAnimMontage* ACharacterBase::GetHitReactMontage_Implementation()
 {
@@ -282,6 +290,11 @@ void ACharacterBase::SetIsBeingShocked_Implementation(bool bInShock)
 bool ACharacterBase::IsBeingShocked_Implementation() const
 {
 	return IsBeingShocked;
+}
+
+FOnDamageSignature& ACharacterBase::GetOnDamageDelegate()
+{
+	return OnDamageDelegate;
 }
 
 

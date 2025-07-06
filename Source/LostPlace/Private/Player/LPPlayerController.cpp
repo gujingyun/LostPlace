@@ -11,8 +11,11 @@
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
+#include "Actors/MagicCircle.h"
+#include "Components/DecalComponent.h"
 #include "Input/InputComponentBase.h"
 #include "GameFramework/Character.h"
+#include "LostPlace/LostPlace.h"
 #include "UI/DamageTextComponent.h"
 // Sets default values
 ALPPlayerController::ALPPlayerController()
@@ -213,6 +216,23 @@ void ALPPlayerController::PlayerTick(float DeltaTime)
 
 	CursorTrace();
 	AutoRun();
+	UpdateMagicCircleLocation();
+}
+
+void ALPPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
+{
+	if(!IsValid(MagicCircle)) MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+
+	//设置贴花材质
+	if(DecalMaterial != nullptr)
+	{
+		MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
+	}
+}
+
+void ALPPlayerController::HideMagicCircle() const
+{
+	if(IsValid(MagicCircle)) MagicCircle->Destroy();
 }
 
 void ALPPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter,bool bBlockedHit,bool bCriticalHit)
@@ -248,6 +268,17 @@ void ALPPlayerController::AutoRun()
 	}
 }
 
+void ALPPlayerController::UpdateMagicCircleLocation() const
+{
+	if(IsValid(MagicCircle))
+	{
+		if(IsValid(MagicCircle))
+		{
+			MagicCircle->SetActorLocation(CursorHit.ImpactPoint);
+		}
+	}
+}
+
 //鼠标位置追踪
 void ALPPlayerController::CursorTrace()
 {
@@ -259,7 +290,8 @@ void ALPPlayerController::CursorTrace()
 		ThisActor = nullptr;
 		return;
 	}
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit); //获取可视的鼠标命中结果
+	const ECollisionChannel TraceChannel = IsValid(MagicCircle) ? ECC_ExcludePlayers : ECC_Visibility;
+	GetHitResultUnderCursor(TraceChannel, false, CursorHit); //获取可视的鼠标命中结果
 	if(!CursorHit.bBlockingHit) return; //如果未命中直接返回
 
 	LastActor = ThisActor;

@@ -14,6 +14,7 @@ class UNiagaraSystem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*); //Actor初始化ASC完成后委托
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor); //Actor死亡后的委托
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, float /*范围伤害造成的最终数值*/); //返回范围伤害能够对自身造成的伤害，在TakeDamage里广播
 
 //蒙太奇动画和标签以及骨骼位置的映射，用于攻击技能获取和设置攻击范围
 USTRUCT(BlueprintType)
@@ -71,6 +72,13 @@ public:
 	UAnimMontage* GetHitReactMontage();
 
 	virtual void Die(const FVector& DeathImpulse) = 0;
+	virtual FOnDeath& GetOnDeathDelegate() = 0; //获取死亡委托
+
+	/**
+	 * 获取角色受到伤害触发的委托，由于委托是创建在角色基类里的，这里可以通过添加struct来实现前向声明，不需要在头部声明一遍。
+	 * @return 委托
+	 */
+	virtual FOnDamageSignature& GetOnDamageDelegate() = 0; 
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead() const; //获取当前角色是否死亡
@@ -97,7 +105,6 @@ public:
 	ECharacterClass GetCharacterClass(); //获取当前角色的职业
 
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0; //获取ASC注册成功后的委托
-	virtual FOnDeath& GetOnDeathDelegate() = 0; //获取死亡委托
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetInShockLoop(bool bInLoop);

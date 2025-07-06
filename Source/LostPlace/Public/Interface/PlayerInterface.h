@@ -55,4 +55,12 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp(); //升级
+
+	//显示魔法光圈 并设置光圈贴花材质
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+
+	//隐藏魔法光圈
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void HideMagicCircle() const; 
 };

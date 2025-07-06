@@ -63,7 +63,22 @@ struct FDamageEffectParams
 	UPROPERTY(BlueprintReadWrite)
 	FVector KnockbackForce = FVector::ZeroVector; //攻击时击退的方向
 	
-	
+	//当前伤害类型是否为范围伤害
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+
+	//内半径：在此半径内的所有目标都将受到完整的伤害
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+
+	//外半径：超过这个距离的目标受到最小伤害，最小伤害如果设置为0，则圈外不受到伤害
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+
+	//伤害源的中心点
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+
 };
 
 USTRUCT(BlueprintType) //在蓝图中可作为类型使用
@@ -85,6 +100,10 @@ public:
 	TSharedPtr<FGameplayTag> GetDamageType() const { return DamageType; } //获取 负面效果伤害类型
 	FVector GetDeathImpulse() const { return DeathImpulse; } //获取到死亡冲击的方向和力度
 	FVector GetKnockbackForce() const { return KnockbackForce; } //获取击退的方向和力度
+	bool IsRadialDamage() const { return bIsRadialDamage; }//获取当前伤害类型是否为范围伤害
+	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }//获取内半径：在此半径内的所有目标都将受到完整的伤害
+	float GetRadialDamageOuterRadius() const { return RadialDamageOuterRadius; }//获取外半径：超过这个距离的目标受到最小伤害，最小伤害如果设置为0，则圈外不受到伤害
+	FVector GetRadialDamageOrigin() const { return RadialDamageOrigin; }//获取伤害源的中心点
 	
 	void SetIsSuccessfulDeBuff(const bool bInIsSuccessfulDeBuff) { bIsSuccessfulDeBuff = bInIsSuccessfulDeBuff; } //设置 应用负面效果
 	void SetDeBuffDamage(const float InDamage) { DeBuffDamage = InDamage; } //设置 负面效果伤害
@@ -93,6 +112,10 @@ public:
 	void SetDamageType(const TSharedPtr<FGameplayTag>& InDamageType) { DamageType = InDamageType; } //设置 负面效果伤害类型
 	void SetDeathImpulse(const FVector& InImpulse) { DeathImpulse = InImpulse; } //设置死亡冲击的方向和力度
 	void SetKnockbackForce(const FVector& InForce) { KnockbackForce = InForce; } //设置击退的方向和力度
+	void SetIsRadialDamage(const bool bInIsRadialDamage) { bIsRadialDamage = bInIsRadialDamage; }//设置当前伤害类型是否为范围伤害
+	void SetRadialDamageInnerRadius(const float InInnerRadius) { RadialDamageInnerRadius = InInnerRadius; }//设置内半径：在此半径内的所有目标都将受到完整的伤害
+	void SetRadialDamageOuterRadius(const float InOuterRadius) { RadialDamageOuterRadius = InOuterRadius; }//设置外半径：超过这个距离的目标受到最小伤害，最小伤害如果设置为0，则圈外不受到伤害
+	void SetRadialDamageOrigin(const FVector& InOrigin) { RadialDamageOrigin = InOrigin; }//设置伤害源的中心点
 
 	/** 返回用于序列化的实际结构体 */
 	virtual UScriptStruct* GetScriptStruct() const override
@@ -146,6 +169,22 @@ protected:
 
 	UPROPERTY()
 	FVector KnockbackForce = FVector::ZeroVector; //攻击时击退的方向
+
+	//当前伤害类型是否为范围伤害
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	//内半径：在此半径内的所有目标都将受到完整的伤害
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+
+	//外半径：超过这个距离的目标受到最小伤害，最小伤害如果设置为0，则圈外不受到伤害
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	//伤害源的中心点
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 };
 template<>
 struct TStructOpsTypeTraits< FLPGameplayEffectContext > : public TStructOpsTypeTraitsBase2< FGameplayEffectContext >
