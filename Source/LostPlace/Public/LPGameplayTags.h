@@ -99,9 +99,11 @@ public:
 
 	
 	FGameplayTag Abilities_Fire_FireBolt; //火球术技能标签
+	FGameplayTag Abilities_Fire_FireBlast; //火焰爆发技能标签
+	
 	FGameplayTag Abilities_Lightning_Electrocute; //雷击技能标签
 	FGameplayTag Abilities_Arcane_ArcaneShards; //奥数爆发技能标签
-
+	
 	FGameplayTag Abilities_Passive_HaloOfProtection; //被动技能-守护光环
 	FGameplayTag Abilities_Passive_LifeSiphon; //被动技能-生命回复
 	FGameplayTag Abilities_Passive_ManaSiphon; //被动技能-蓝量回复
@@ -134,6 +136,7 @@ public:
 	FGameplayTag Player_Block_InputReleased; //阻挡键位抬起输入
 	FGameplayTag Player_Block_CursorTrace; //阻挡鼠标拾取事件
 
+	FGameplayTag GameplayCue_FireBlast; //火焰爆炸火球爆炸时的表现效果
 
 
 private:

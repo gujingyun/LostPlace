@@ -128,7 +128,7 @@ public:
 	 *
 	 * @return 如果是范围伤害 返回true
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static bool IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -140,7 +140,7 @@ public:
 	 *
 	 * @return 返回负面效果触发间隔
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static float GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -152,7 +152,7 @@ public:
 	 *
 	 * @return 返回负面效果触发间隔
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static float GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -164,18 +164,18 @@ public:
 	 *
 	 * @return 攻击的击退会根据概率计算，如果有值，则为应用成功
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintPure, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static FVector GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
 	/**
- * 设置GE是否为范围伤害
- *
- * @param EffectContextHandle 当前GE的上下文句柄
- * @param bInIsRadialDamage true为设置为范围伤害
- *
- * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
- */
+	 * 设置GE是否为范围伤害
+	 *
+	 * @param EffectContextHandle 当前GE的上下文句柄
+	 * @param bInIsRadialDamage true为设置为范围伤害
+	 *
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
+	 */
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static void SetIsRadialDamage(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool bInIsRadialDamage);
 
@@ -185,7 +185,7 @@ public:
 	 * @param EffectContextHandle 当前GE的上下文句柄
 	 * @param InRadialDamageInnerRadius 内半径距离 内半径内受到完整伤害
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static void SetRadialDamageInnerRadius(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, float InRadialDamageInnerRadius);
@@ -196,7 +196,7 @@ public:
 	 * @param EffectContextHandle 当前GE的上下文句柄
 	 * @param InRadialDamageOuterRadius 外半径距离，超出此距离外的敌人将无法受到伤害
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static void SetRadialDamageOuterRadius(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, float InRadialDamageOuterRadius);
@@ -207,7 +207,7 @@ public:
 	 * @param EffectContextHandle 当前GE的上下文句柄
 	 * @param InRadialDamageOrigin 伤害源的中心点
 	 *
-	 * @note 此属性是RPGAbilityTypes.h内自定义属性，可实现复制。
+	 * @note 此属性是LPAbilityTypes.h内自定义属性，可实现复制。
 	 */
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
 	static void SetRadialDamageOrigin(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector& InRadialDamageOrigin);
@@ -269,5 +269,44 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayMechanics")
 	static void GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin);
+
+	/*
+	 * 伤害效果参数
+	 */
+	
+	/**
+	 * 修改伤害配置项，将其设置为具有范围伤害的配置项
+	 * @param DamageEffectParams 需要修改的配置项
+	 * @param bIsRadial 设置是否为范围伤害
+	 * @param InnerRadius 内半径
+	 * @param OutRadius 外半径
+	 * @param Origin 伤害中心
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
+	static void SetIsRadialDamageEffectParams(UPARAM(ref) FDamageEffectParams& DamageEffectParams, bool bIsRadial, float InnerRadius, float OutRadius, FVector Origin);
+
+	/**
+	 * 修改伤害的冲击力的方向
+	 * @param DamageEffectParams 需要修改的伤害配置项
+	 * @param KnockbackDirection 攻击时触发击退的方向
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
+	static void SetKnockbackDirection(UPARAM(ref) FDamageEffectParams& DamageEffectParams, FVector KnockbackDirection, float Magnitude = 0.f);
+	
+	/**
+	 * 修改伤害的冲击力的方向
+	 * @param DamageEffectParams 需要修改的伤害配置项
+	 * @param ImpulseDirection 死亡时触发击退的方向
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
+	static void SetDeathImpulseDirection(UPARAM(ref) FDamageEffectParams& DamageEffectParams, FVector ImpulseDirection, float Magnitude = 0.f);
+
+	/**
+	 * 设置伤害配置应用目标ASC
+	 * @param DamageEffectParams 需要修改的伤害配置 
+	 * @param InASC 应用目标ASC
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|GameplayEffects")
+	static void SetEffectParamsTargetASC(UPARAM(ref) FDamageEffectParams& DamageEffectParams, UAbilitySystemComponent* InASC);
 
 };

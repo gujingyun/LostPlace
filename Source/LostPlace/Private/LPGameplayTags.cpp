@@ -315,7 +315,12 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Fire.FireBolt"),
 		FString("火球术技能标签")
 		);
-
+	GameplayTags.Abilities_Fire_FireBlast = UGameplayTagsManager::Get()
+	.AddNativeGameplayTag(
+	FName("Abilities.Fire.FireBlast"),
+	FString("火焰爆发技能标签")
+	);
+	
 	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get()
 	.AddNativeGameplayTag(
 		FName("Abilities.Lightning.Electrocute"),
@@ -476,5 +481,11 @@ void FLPGameplayTags::InitializeNativeGameplayTags()
 			FString("阻挡鼠标拾取事件")
 			);
 
+	
+	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get()
+		.AddNativeGameplayTag(
+			FName("GameplayCue.FireBlast"),
+			FString("火焰爆炸表现效果标签")
+			);
 
 }
