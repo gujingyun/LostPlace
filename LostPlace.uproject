@@ -11,7 +11,10 @@
 			"AdditionalDependencies": [
 				"GameplayAbilities",
 				"Engine",
-				"AIModule"
+				"AIModule",
+				"Niagara",
+				"ModelViewViewModel",
+				"UMG"
 			]
 		}
 	],
@@ -29,6 +32,10 @@
 		},
 		{
 			"Name": "MotionWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
 			"Enabled": true
 		}
 	]
