@@ -14,6 +14,7 @@ class UAbilitySystemComponent;
 class UAttributeSet;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChanged, int32);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerLevelChanged, int32, bool); //等级变动委托，返回新的等级和是否显示升级弹框
 
 /**
  * 
@@ -36,13 +37,13 @@ public:
 	TObjectPtr<ULevelUpInfo> LevelUpInfo; //设置升级相关数据
 	
 	FOnPlayerStateChanged OnXPChangedDelegate; //经验值变动委托
-	FOnPlayerStateChanged OnLevelChangedDelegate; //等级变动委托
+	FOnPlayerLevelChanged OnLevelChangedDelegate; //等级变动委托
+
 	FOnPlayerStateChanged OnAttributePointsChangedDelegate; //属性点数变动委托
 	FOnPlayerStateChanged OnSpellPointsChangedDelegate; //技能点数变动委托
 	void AddToLevel(int32 InLevel); //增加等级
 	void SetLevel(int32 InLevel); //设置当前等级
 
-	
 	void AddToXP(int32 InXP); //增加经验值
 	void SetXP(int32 InXP); //设置当前经验值
 
@@ -80,7 +81,7 @@ private:
 
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_SpellPoints)
-	int32 SpellPoints = 1;
+	int32 SpellPoints = 0;
 
 	UFUNCTION()
 	void OnRep_SpellPoints(int32 OldSpellPoints) const; //服务器出现更改自动同步到本地函数 属性点

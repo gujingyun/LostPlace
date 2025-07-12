@@ -44,7 +44,7 @@ struct FWidgetControllerParams
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangedSignature, int32, NewValue); //当玩家状态该表回调类型
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerLevelChangedSignature, int32, NewLevel,bool,bLevelUp); //当玩家状态该表回调类型
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FLPAbilityInfo&, Info);
 
 

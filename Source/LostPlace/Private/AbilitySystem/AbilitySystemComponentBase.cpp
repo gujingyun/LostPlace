@@ -9,12 +9,49 @@
 #include "AbilitySystem/LPAbilitySystemLibrary.h"
 #include "AbilitySystem/Abilities/GameplayAbilityBase.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
+#include "Core/LoadScreenSaveGame.h"
 #include "Interface/PlayerInterface.h"
 #include "LostPlace/LPLogChannels.h"
 
 void UAbilitySystemComponentBase::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAbilitySystemComponentBase::ClientEffectApplied);
+}
+
+void UAbilitySystemComponentBase::AddCharacterAbilitiesFormSaveData(ULoadScreenSaveGame* SaveGameData)
+{
+	for(const FSavedAbility& Data : SaveGameData->SavedAbilities)
+	{
+		const TSubclassOf<UGameplayAbility> LoadedAbilityClass = Data.GameplayAbility;
+
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(LoadedAbilityClass, Data.AbilityLevel);
+
+		// LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.AbilityInputTag); //设置技能激活输入标签
+		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.AbilitySlot); //设置技能激活输入标签
+		LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(Data.AbilityStatus); //设置技能状态标签
+
+		//主动技能的处理
+		if(Data.AbilityType == FLPGameplayTags::Get().Abilities_Type_Offensive)
+		{
+			GiveAbility(LoadedAbilitySpec); //只应用不激活
+		}
+		//被动技能的处理
+		else if(Data.AbilityType == FLPGameplayTags::Get().Abilities_Type_Passive)
+		{
+			//确保技能已经装配
+			if(Data.AbilityStatus.MatchesTagExact(FLPGameplayTags::Get().Abilities_Status_Equipped))
+			{
+				GiveAbilityAndActivateOnce(LoadedAbilitySpec); //应用技能并激活
+			}
+			else
+			{
+				GiveAbility(LoadedAbilitySpec); //只应用不激活
+			}
+		}
+	}
+
+	bStartupAbilitiesGiven = true;
+	AbilityGivenDelegate.Broadcast();
 }
 
 void UAbilitySystemComponentBase::AddCharacterAbilities(
@@ -43,6 +80,8 @@ void UAbilitySystemComponentBase::AddCharacterPassiveAbilities(
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : StartupPassiveAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(FLPGameplayTags::Get().Abilities_Status_Equipped);
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 }
@@ -308,6 +347,8 @@ void UAbilitySystemComponentBase::ServerEquipAbility_Implementation(const FGamep
 					TryActivateAbility(AbilitySpec->Handle);
 					MulticastActivatePassiveEffect(AbilityTag,true);
 				}
+				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GetStatusFromSpec(*AbilitySpec));
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
 			}
 			AssignSlotToAbility(*AbilitySpec,Slot); //设置技能槽位
 			MarkAbilitySpecDirty(*AbilitySpec); //设置当前技能立即复制到每个客户端

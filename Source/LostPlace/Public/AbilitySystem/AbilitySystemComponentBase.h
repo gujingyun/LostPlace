@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemComponentBase.generated.h"
+class ULoadScreenSaveGame;
 struct FLPGameplayTags;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags,const FGameplayTagContainer& );
 DECLARE_MULTICAST_DELEGATE(FAbilityGiven) //技能初始化应用后的回调委托
@@ -30,6 +31,7 @@ public:
 	FDeactivatePassiveAbility DeactivatePassiveAbility; //取消技能激活的委托
 	FActivePassiveEffect ActivatePassiveEffect; //被动技能对应特效委托
 
+	void AddCharacterAbilitiesFormSaveData(ULoadScreenSaveGame* SaveGameData);
 	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
 	

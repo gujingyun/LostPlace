@@ -6,12 +6,18 @@
 #include "LPGameplayTags.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
+#include "AbilitySystem/LPAbilitySystemLibrary.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/LPPlayerState.h"
 #include "Player/LPPlayerController.h"
 #include "UI/LPHUD.h"
 #include "Characters/CharacterBase.h"
+#include "Core/LoadScreenSaveGame.h"
+#include "Core/LPGameInstance.h"
+#include "Core/LPGameMode.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ALPPlayerBase::ALPPlayerBase()
@@ -58,6 +64,8 @@ ALPPlayerBase::ALPPlayerBase()
 
 
 }
+
+
 void ALPPlayerBase::InitAbilityActorInfo()
 {
 	ALPPlayerState* PlayerStateBase = GetPlayerState<ALPPlayerState>();
@@ -85,7 +93,7 @@ void ALPPlayerBase::InitAbilityActorInfo()
 		}
 	}
 
-	InitDefaultAttributes();
+	// InitDefaultAttributes();
 }
 
 
@@ -145,8 +153,46 @@ void ALPPlayerBase::PossessedBy(AController* NewController)
 	InitAbilityActorInfo();
 	
 	SetOwner(NewController);
-	
-	AddCharacterAbilities();
+	LoadProgress();
+	if (ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		LPGameMode->LoadWorldState(GetWorld());
+	}
+}
+void ALPPlayerBase::LoadProgress()
+{
+	ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this));
+	if (LPGameMode)
+	{
+		ULoadScreenSaveGame* SaveData = LPGameMode->RetrieveInGameSaveData();
+		if (SaveData == nullptr) return;
+
+		//判断是否为第一次加载存档，如果第一次，属性没有相关内容
+		if(SaveData->bFirstTimeLoadIn)
+		{
+			//如果第一次加载存档，使用默认GE初始化主要属性
+			InitDefaultAttributes();
+			//初始化角色技能
+			AddCharacterAbilities();
+		}
+		else
+		{
+			if (UAbilitySystemComponentBase* LPASC = Cast<UAbilitySystemComponentBase>(AbilitySystemComponent))
+			{
+				LPASC->AddCharacterAbilitiesFormSaveData(SaveData);
+			}
+			if(ALPPlayerState* LPPlayerState = Cast<ALPPlayerState>(GetPlayerState()))
+			{
+				LPPlayerState->SetLevel(SaveData->PlayerLevel);
+				LPPlayerState->SetXP(SaveData->XP);
+				LPPlayerState->SetAttributePoints(SaveData->AttributePoints);
+				LPPlayerState->SetSpellPoints(SaveData->SpellPoints);
+			}
+			//如果不是第一次，将通过函数库函数通过存档数据初始化角色属性
+			ULPAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(this, AbilitySystemComponent, SaveData);
+		}
+
+	}
 }
 
 void ALPPlayerBase::OnRep_PlayerState()
@@ -261,6 +307,64 @@ void ALPPlayerBase::HideMagicCircle_Implementation() const
 	{
 		PlayerControllerBase->HideMagicCircle();
 		PlayerControllerBase->bShowMouseCursor = true;
+	}
+}
+
+void ALPPlayerBase::SaveProgress_Implementation(const FName& CheckpointTag)
+{
+	ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this));
+	if (LPGameMode)
+	{
+		ULoadScreenSaveGame* SaveData = LPGameMode->RetrieveInGameSaveData();
+		if (SaveData == nullptr) return;
+		SaveData->PlayerStartTag = CheckpointTag;
+		SaveData->ActivatedPlayerStatTags.AddUnique(CheckpointTag);
+		//修改玩家相关
+		if(const ALPPlayerState* LPPlayerState = Cast<ALPPlayerState>(GetPlayerState()))
+		{
+			SaveData->PlayerLevel = LPPlayerState->GetPlayerLevel();
+			SaveData->XP = LPPlayerState->GetXP();
+			SaveData->AttributePoints = LPPlayerState->GetAttributePoints();
+			SaveData->SpellPoints = LPPlayerState->GetSpellPoints();
+		}
+
+		//修改主要属性
+		SaveData->Strength = UAttributeSetBase::GetStrengthAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Intelligence = UAttributeSetBase::GetIntelligenceAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Resilience = UAttributeSetBase::GetResilienceAttribute().GetNumericValue(GetAttributeSet());
+		SaveData->Vigor = UAttributeSetBase::GetVigorAttribute().GetNumericValue(GetAttributeSet());
+
+		SaveData->bFirstTimeLoadIn = false; //保存完成将第一次加载属性设置为false
+		if(!HasAuthority()) return;
+
+		UAbilitySystemComponentBase* LPASC = Cast<UAbilitySystemComponentBase>(AbilitySystemComponent);
+		SaveData->SavedAbilities.Empty(); //清空数组
+
+		//使用ASC里创建的ForEach函数循环获取角色的技能，并生成技能结构体保存
+		FForEachAbility SaveAbilityDelegate;
+		SaveAbilityDelegate.BindLambda([this, LPASC, SaveData](const FGameplayAbilitySpec& AbilitySpec)
+		{
+			//获取技能标签和
+			const FGameplayTag AbilityTag = UAbilitySystemComponentBase::GetAbilityTagFromSpec(AbilitySpec);
+			UAbilityInfo* AbilityInfo = ULPAbilitySystemLibrary::GetAbilityInfo(this);
+			FLPAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+
+			//创建技能结构体
+			FSavedAbility SavedAbility;
+			SavedAbility.GameplayAbility = Info.Ability;
+			SavedAbility.AbilityLevel = AbilitySpec.Level;
+			SavedAbility.AbilityTag = AbilityTag;
+			SavedAbility.AbilitySlot = LPASC->GetSlotFromAbilityTag(AbilityTag);
+			SavedAbility.AbilityStatus = LPASC->GetStatusFromAbilityTag(AbilityTag);
+			// SavedAbility.AbilityInputTag = LPASC->GetInputTagFromAbilityTag(AbilityTag);
+			SavedAbility.AbilityType = Info.AbilityType;
+			
+			SaveData->SavedAbilities.AddUnique(SavedAbility);
+		});
+		//调用ForEach技能来执行存储到存档
+		LPASC->ForEachAbility(SaveAbilityDelegate);
+		
+		LPGameMode->SaveInGameProgressData(SaveData);
 	}
 }
 

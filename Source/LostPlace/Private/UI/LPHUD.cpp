@@ -28,7 +28,10 @@ void ALPHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystem
 
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS); //创建参数结构体
 	OverlayWidgetController = GetOverlayWidgetController(WidgetControllerParams); //获取控制器层
-
+	//初始化所有控制器
+	GetAttributeMenuWidgetController(WidgetControllerParams);
+	GetSpellMenuWidgetController(WidgetControllerParams);
+	
 	OverlayWidget->SetWidgetController(OverlayWidgetController); //设置用户控件的控制器层
 	OverlayWidgetController->BroadcastInitialValues(); //初始化广播的值
 	// OverlayWidgetController->BindCallbacksToDependencies(); //绑定监听数值变化

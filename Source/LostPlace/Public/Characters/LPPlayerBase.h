@@ -52,6 +52,7 @@ public:
 	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() const override;
+	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
 	/* IPlayerInterface战斗接口 结束 */
 
 
@@ -75,7 +76,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	
+	void LoadProgress(); //加载进度
 private:
 	virtual void InitAbilityActorInfo() override;
 

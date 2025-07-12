@@ -8,6 +8,8 @@
 #include "PassiveNiagaraComponent.generated.h"
 
 
+class UAbilitySystemComponentBase;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class LOSTPLACE_API UPassiveNiagaraComponent : public UNiagaraComponent
 {
@@ -30,4 +32,5 @@ protected:
 	 * @param bActivate 激活还是关闭
 	 */
 	void OnPassiveActivate(const FGameplayTag& AbilityTag, bool bActivate);
+	void ActivateIfEquipped(UAbilitySystemComponentBase* LPASC);
 };

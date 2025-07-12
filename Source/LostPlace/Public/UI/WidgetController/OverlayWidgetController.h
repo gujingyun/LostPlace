@@ -67,7 +67,7 @@ public:
 	FOnAttributeChangedSignature OnXPPercentChangedDelegate; //经验条百分比变动回调
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
-	FOnPlayerStateChangedSignature OnPlayerLevelChangeDelegate; //等级变动回调
+	FOnPlayerLevelChangedSignature OnPlayerLevelChangeDelegate; //等级变动回调
 
 
 protected:

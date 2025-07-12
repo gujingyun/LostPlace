@@ -44,7 +44,13 @@ public:
 	TMap<ECharacterClass, FCharacterClassDefaultInfo> CharacterClassInformation;
 	
 	UPROPERTY(EditDefaultsOnly, Category="常见类默认值")
+	TSubclassOf<UGameplayEffect> PrimaryAttributes_SetByCaller;
+	
+	UPROPERTY(EditDefaultsOnly, Category="常见类默认值")
 	TSubclassOf<UGameplayEffect> SecondaryAttributes;
+
+	UPROPERTY(EditDefaultsOnly, Category="常见类默认值")
+	TSubclassOf<UGameplayEffect> SecondaryAttributes_Infinite;
 	
 	UPROPERTY(EditDefaultsOnly, Category="常见类默认值")
 	TSubclassOf<UGameplayEffect> VitalAttributes;

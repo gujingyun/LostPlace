@@ -24,9 +24,9 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	GetLPPS()->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
 
 	//绑定等级相关回调
-	GetLPPS()->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
+	GetLPPS()->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel,bool bLevelUp)
 	{
-		OnPlayerLevelChangeDelegate.Broadcast(NewLevel);
+		OnPlayerLevelChangeDelegate.Broadcast(NewLevel,bLevelUp);
 	});
 
 	

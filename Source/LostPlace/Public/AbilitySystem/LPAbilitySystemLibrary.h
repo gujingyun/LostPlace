@@ -6,6 +6,7 @@
 #include "Data/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "LPAbilitySystemLibrary.generated.h"
+class ULoadScreenSaveGame;
 struct FDamageEffectParams;
 struct FWidgetControllerParams;
 class USpellMenuWidgetController;
@@ -45,6 +46,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass, float Level, UAbilitySystemComponent* ASC);
 
+	/**
+	 * 从存档初始化角色的属性
+	 *
+	 * @param WorldContextObject 一个世界场景的对象，用于获取当前所在的世界
+	 * @param ASC 角色的技能系统组件
+	 * @param SaveGame 角色使用的存档指针
+	 *
+	 * @return void 
+	 *
+	 * @note 这个函数主要用于从存档里读取角色信息，并初始化
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults", meta=(DefaultToSelf = "WorldContextObject"))
+	static void InitializeDefaultAttributesFromSaveData(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ULoadScreenSaveGame* SaveGame);
+
+	
 	//初始化角色的技能
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass);

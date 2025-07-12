@@ -62,5 +62,8 @@ public:
 
 	//隐藏魔法光圈
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
-	void HideMagicCircle() const; 
+	void HideMagicCircle() const;
+
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void SaveProgress(const FName& CheckpointTag);
 };

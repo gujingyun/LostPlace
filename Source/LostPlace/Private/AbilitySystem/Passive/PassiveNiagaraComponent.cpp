@@ -4,6 +4,7 @@
 #include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "LPGameplayTags.h"
 #include "AbilitySystem/AbilitySystemComponentBase.h"
 #include "Interface/CombatInterface.h"
 
@@ -20,6 +21,8 @@ void UPassiveNiagaraComponent::BeginPlay()
 	if(UAbilitySystemComponentBase* LPASC = Cast<UAbilitySystemComponentBase>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())))
 	{
 		LPASC->ActivatePassiveEffect.AddUObject(this, &UPassiveNiagaraComponent::OnPassiveActivate);
+		ActivateIfEquipped(LPASC);
+
 	}
 	else if(ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner()))
 	{
@@ -29,6 +32,7 @@ void UPassiveNiagaraComponent::BeginPlay()
 			if(UAbilitySystemComponentBase* LPASC = Cast<UAbilitySystemComponentBase>(InASC))
 			{
 				LPASC->ActivatePassiveEffect.AddUObject(this, &UPassiveNiagaraComponent::OnPassiveActivate);
+				ActivateIfEquipped(LPASC);
 			}
 		});
 	}
@@ -48,6 +52,17 @@ void UPassiveNiagaraComponent::OnPassiveActivate(const FGameplayTag& AbilityTag,
 		else
 		{
 			Deactivate();
+		}
+	}
+}
+
+void UPassiveNiagaraComponent::ActivateIfEquipped(UAbilitySystemComponentBase* LPASC)
+{
+	if (LPASC->bStartupAbilitiesGiven)
+	{
+		if (LPASC->GetStatusFromAbilityTag(PassiveSpellTag) == FLPGameplayTags::Get().Abilities_Status_Equipped)
+		{
+			OnPassiveActivate(PassiveSpellTag, true);
 		}
 	}
 }

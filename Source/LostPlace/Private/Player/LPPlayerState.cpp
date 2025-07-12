@@ -38,15 +38,14 @@ UAbilitySystemComponent* ALPPlayerState::GetAbilitySystemComponent() const
 void ALPPlayerState::AddToLevel(int32 InLevel)
 {
 	Level += InLevel;
-	OnLevelChangedDelegate.Broadcast(Level);
+	OnLevelChangedDelegate.Broadcast(Level,true);
 }
 
 void ALPPlayerState::SetLevel(int32 InLevel)
 {
 	Level = InLevel;
-	OnLevelChangedDelegate.Broadcast(Level);
+	OnLevelChangedDelegate.Broadcast(Level,false);
 }
-
 void ALPPlayerState::AddToXP(int32 InXP)
 {
 	XP += InXP;
@@ -85,7 +84,7 @@ void ALPPlayerState::SetSpellPoints(int32 InSpellPoints)
 
 void ALPPlayerState::OnRep_Level(int32 OldLevel) const
 {
-	OnLevelChangedDelegate.Broadcast(Level);//上面修改委托只会在服务器触发，在此处设置是在服务器更新到客户端本地后触发
+	OnLevelChangedDelegate.Broadcast(Level,true);//上面修改委托只会在服务器触发，在此处设置是在服务器更新到客户端本地后触发
 }
 
 void ALPPlayerState::OnRep_XP(int32 OldXP) const
