@@ -42,6 +42,9 @@ public:
 	void SetMapName(const FString& InMapName);
 	FString GetMapName() const { return MapName; };
 
+	void SetMapAssetName(const FString& InMapAssetName);
+	FString GetMapAssetName() const { return MapAssetName; };
+	
 	void SetPlayerStartTag(const FName& InPlayerStartTag);
 	FName GetPlayerStartTag() const { return PlayerStartTag; };
 
@@ -54,6 +57,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess))
 	FString MapName;
+	
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess))
+	FString MapAssetName;
 	
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess))
 	int32 PlayerLevel;

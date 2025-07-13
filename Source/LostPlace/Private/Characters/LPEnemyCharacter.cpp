@@ -34,7 +34,12 @@ ALPEnemyCharacter::ALPEnemyCharacter()
 
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent()); //将血条附件到根节点上
-
+	
+	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	GetMesh()->MarkRenderStateDirty();
+	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	Weapon->MarkRenderStateDirty();
+	
 	BaseWalkSpeed = 250.f;
 }
 
@@ -52,6 +57,7 @@ void ALPEnemyCharacter::PossessedBy(AController* NewController)
 	LPAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
 
 }
+
 
 // Called when the game starts or when spawned
 void ALPEnemyCharacter::BeginPlay()
@@ -125,20 +131,23 @@ void ALPEnemyCharacter::InitDefaultAttributes() const
 }
 
 
-void ALPEnemyCharacter::HighlightActor()
+void ALPEnemyCharacter::HighlightActor_Implementation()
 {
 	bHighlighted = true;
 	GetMesh()->SetRenderCustomDepth(true);
-	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 	Weapon->SetRenderCustomDepth(true);
-	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
-void ALPEnemyCharacter::UnHighlightActor()
+void ALPEnemyCharacter::UnHighlightActor_Implementation()
 {
 	bHighlighted = false;
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);
+}
+
+void ALPEnemyCharacter::SetMoveToLocation_Implementation(FVector& OutDestination)
+{
+	//无操作不更改目的地，攻击范围添加上之后可以修改这里进行移动
 }
 
 void ALPEnemyCharacter::SetCombatTarget_Implementation(AActor* InCombatTarget)

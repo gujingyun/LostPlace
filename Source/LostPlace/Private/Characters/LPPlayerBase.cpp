@@ -374,3 +374,23 @@ int32 ALPPlayerBase::GetPlayerLevel_Implementation()
 	check(PlayerStateBase);
 	return PlayerStateBase->GetPlayerLevel();
 }
+
+void ALPPlayerBase::Die(const FVector& DeathImpulse)
+{
+	Super::Die(DeathImpulse);
+	//创建一个委托，用于绑定委托回调
+	FTimerDelegate DeathTimerDelegate;
+	DeathTimerDelegate.BindLambda([this]()
+	{
+		if(const ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this)))
+		{
+			LPGameMode->PlayerDied(this);
+		}
+	});
+
+	//通过定时器触发对应的委托广播
+	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+
+	//防止相机在玩家角色死亡后跟随移动，将相机固定在世界坐标位置
+	FollowCamera->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}

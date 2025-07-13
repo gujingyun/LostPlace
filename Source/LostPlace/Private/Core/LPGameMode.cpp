@@ -7,6 +7,7 @@
 #include "CheckPoints/CheckPoint.h"
 #include "Core/LoadScreenSaveGame.h"
 #include "Core/LPGameInstance.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "LostPlace/LPLogChannels.h"
@@ -29,6 +30,7 @@ void ALPGameMode::SaveSlotData(const UMVVM_LoadSlot* LoadSlot, int32 SlotIndex) 
 	//设置需要保存的数据
 	LoadScreenSaveGame->PlayerName = LoadSlot->GetPlayerName();
 	LoadScreenSaveGame->MapName = LoadSlot->GetMapName();
+	LoadScreenSaveGame->MapAssetName = LoadSlot->GetMapAssetName();
 	LoadScreenSaveGame->SlotName = LoadSlot->GetSlotName();
 	LoadScreenSaveGame->SlotIndex = SlotIndex;
 	LoadScreenSaveGame->SaveSlotStatus = Taken;
@@ -104,6 +106,18 @@ void ALPGameMode::TravelToMap(const UMVVM_LoadSlot* Slot)
 	UGameplayStatics::OpenLevelBySoftObjectPtr(Slot, Maps.FindChecked(Slot->GetMapName()));
 }
 
+FString ALPGameMode::GetMapNameFromAssetName(const FString& MapAssetName) const
+{
+	for (auto &Map : Maps)
+	{
+		if (Map.Value.ToSoftObjectPath().GetAssetFName() == MapAssetName)
+		{
+			return Map.Key;
+		}
+	}
+	return FString();
+}
+
 AActor* ALPGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
 	const ULPGameInstance* LPGameInstance = Cast<ULPGameInstance>(GetGameInstance());
@@ -133,13 +147,23 @@ AActor* ALPGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	return nullptr;
 }
 
+void ALPGameMode::PlayerDied(const ACharacter* DeadCharacter) const
+{
+	//获取存档数据
+	const ULoadScreenSaveGame* SaveGame = RetrieveInGameSaveData();
+	if(!IsValid(SaveGame)) return;
+
+	//通过地图命名打开地图
+	UGameplayStatics::OpenLevelBySoftObjectPtr(DeadCharacter, Maps.FindChecked(SaveGame->MapName));
+}
+
 void ALPGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	Maps.Add(DefaultMapName, DefaultMap);
 }
 
-void ALPGameMode::SaveWorldState(UWorld* World) const
+void ALPGameMode::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName) const
 {
 	//获取关卡名称
 	FString WorldName = World->GetMapName();
@@ -152,6 +176,11 @@ void ALPGameMode::SaveWorldState(UWorld* World) const
 	//获取存档
 	if(ULoadScreenSaveGame* SaveGame = GetSaveSlotData(LPGI->LoadSlotName, LPGI->LoadSlotIndex))
 	{
+		if(DestinationMapAssetName != FString(""))
+		{
+			SaveGame->MapAssetName = DestinationMapAssetName;
+			SaveGame->MapName = GetMapNameFromAssetName(DestinationMapAssetName);
+		}
 		if(!SaveGame->HasMap(WorldName))
 		{
 			//如果存档不包含对应关卡内容，将创建一个对应的数据结构体存储

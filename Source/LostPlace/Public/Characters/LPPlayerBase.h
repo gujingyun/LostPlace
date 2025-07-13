@@ -56,9 +56,18 @@ public:
 	/* IPlayerInterface战斗接口 结束 */
 
 
-	/** 实现ICombatInterface接口 */
-	virtual int32 GetPlayerLevel_Implementation() override; //获取等级
-	/** 实现ICombatInterface接口结束 */
+	/* ICombatInterface战斗接口 */
+	virtual int32 GetPlayerLevel_Implementation() override;
+	virtual void Die(const FVector& DeathImpulse) override;
+	/* ICombatInterface战斗接口 结束 */
+
+	//角色死亡后持续时间，用于表现角色死亡
+	UPROPERTY(EditDefaultsOnly)
+	float DeathTime = 5.f;
+
+	//声明一个计时器，用于角色死亡后一定时间处理后续逻辑
+	FTimerHandle DeathTimer;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent; //升级特效组件

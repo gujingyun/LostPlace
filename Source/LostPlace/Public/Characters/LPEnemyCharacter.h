@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Interface/HighlightInterface.h"
 #include "LPEnemyCharacter.generated.h"
 
 class UWidgetComponent;
@@ -18,7 +19,7 @@ class UWidgetComponent;
 class ALPAIController;
 
 UCLASS()
-class LOSTPLACE_API ALPEnemyCharacter : public ACharacterBase, public IEnemyInterface
+class LOSTPLACE_API ALPEnemyCharacter : public ACharacterBase, public IEnemyInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -27,9 +28,14 @@ public:
 	ALPEnemyCharacter();
 
 	virtual void PossessedBy(AController* NewController) override;
+	
+	/** 实现IHighlightInterface接口 */
+	virtual void HighlightActor_Implementation() override; //高亮
+	virtual void UnHighlightActor_Implementation() override; //取消高亮
+	virtual void SetMoveToLocation_Implementation(FVector& OutDestination) override; //设置移动目的地
+	/** 实现IHighlightInterface接口结束 */
+	
 	/** 实现IEnemyInterface接口 */
-	virtual void HighlightActor() override; //高亮
-	virtual void UnHighlightActor() override; //取消高亮
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;
 	/** 实现IEnemyInterface接口结束 */
@@ -58,6 +64,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category="战斗")
 	TObjectPtr<AActor> CombatTarget; //攻击目标;
+	
+	void SetLevel(const int32 InLevel) { Level = InLevel; };
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

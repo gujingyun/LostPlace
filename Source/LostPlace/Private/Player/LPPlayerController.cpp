@@ -15,6 +15,7 @@
 #include "Components/DecalComponent.h"
 #include "Input/InputComponentBase.h"
 #include "GameFramework/Character.h"
+#include "Interface/HighlightInterface.h"
 #include "LostPlace/LostPlace.h"
 #include "UI/DamageTextComponent.h"
 // Sets default values
@@ -26,6 +27,8 @@ ALPPlayerController::ALPPlayerController()
 
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
+
+
 void ALPPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
@@ -34,9 +37,15 @@ void ALPPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	}
 	if(InputTag.MatchesTagExact(FLPGameplayTags::Get().InputTag_LMB))
 	{
-		bTargeting = ThisActor != nullptr; //ThisActor为鼠标悬停在敌人身上才会有值
-		bAutoRunning = false;
-		FollowTime = 0.f; //重置统计的时间
+		if (IsValid(ThisActor))
+		{
+			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
+			bAutoRunning = false;
+			FollowTime = 0.f; //重置统计的时间
+		}else
+		{
+			TargetingStatus = ETargetingStatus::NotTargeting;
+		}
 	}
 	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 }
@@ -59,7 +68,16 @@ void ALPPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
-	if (!bTargeting&&!bShiftKeyDown)
+	if (IsValid(ThisActor) && ThisActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_SetMoveToLocation(ThisActor, CachedDestination);
+	}
+	else if (GetASC() && !GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+	}
+	
+	if (TargetingStatus!=ETargetingStatus::TargetingEnemy && !bShiftKeyDown)
 	{
 		const APawn* ControlledPawn = GetPawn();
 		if(FollowTime <= ShortPressThreshold && ControlledPawn)
@@ -79,12 +97,10 @@ void ALPPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true; //设置当前正常自动寻路状态，将在tick中更新位置
 				}
 			}
-			if (GetASC() && !GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
-			}
 			
 		}
+		TargetingStatus = ETargetingStatus::NotTargeting;
+		FollowTime = 0.f; //重置统计的时间
 	}
 }
 
@@ -102,7 +118,7 @@ void ALPPlayerController::AbilityInputTagHold(FGameplayTag InputTag)
 		}
 		return;
 	}
-	if (bTargeting || bShiftKeyDown)
+	if (TargetingStatus==ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
 		if (GetASC())
 		{
@@ -278,14 +294,30 @@ void ALPPlayerController::UpdateMagicCircleLocation() const
 		}
 	}
 }
+void ALPPlayerController::HighlightActor(AActor* InActor)
+{
+	if (IsValid(InActor)&&InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_HighlightActor(InActor);
+	}
+}
+
+void ALPPlayerController::UnHighlightActor(AActor* InActor)
+{
+	if (IsValid(InActor)&&InActor->Implements<UHighlightInterface>())
+	{
+		IHighlightInterface::Execute_UnHighlightActor(InActor);
+	}
+}
 
 //鼠标位置追踪
 void ALPPlayerController::CursorTrace()
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_CursorTrace))
 	{
-		if (LastActor) LastActor->UnHighlightActor();
-		if (ThisActor) ThisActor->UnHighlightActor();
+
+		UnHighlightActor(LastActor);
+		UnHighlightActor(ThisActor);
 		LastActor = nullptr;
 		ThisActor = nullptr;
 		return;
@@ -295,8 +327,14 @@ void ALPPlayerController::CursorTrace()
 	if(!CursorHit.bBlockingHit) return; //如果未命中直接返回
 
 	LastActor = ThisActor;
-	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
-
+	if (IsValid(CursorHit.GetActor())&&CursorHit.GetActor()->Implements<UHighlightInterface>())
+	{
+		ThisActor = CursorHit.GetActor();
+	}else
+	{
+		ThisActor = nullptr;
+	}
+	
 	/**
 	 * 射线拾取后，会出现的几种情况
 	 * 1. LastActor is null   ThisActor is null 不需要任何操作
@@ -308,8 +346,8 @@ void ALPPlayerController::CursorTrace()
 
 	if (LastActor != ThisActor)
 	{
-		if (LastActor) LastActor->UnHighlightActor();
-		if (ThisActor) ThisActor->HighlightActor();
+		UnHighlightActor(LastActor);
+		HighlightActor(ThisActor);
 	}
 	// if(LastActor == nullptr)
 	// {

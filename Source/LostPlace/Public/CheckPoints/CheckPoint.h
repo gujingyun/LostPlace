@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerStart.h"
+#include "Interface/HighlightInterface.h"
 #include "Interface/SaveInterface.h"
+#include "LostPlace/LostPlace.h"
 #include "CheckPoint.generated.h"
 
 class USphereComponent;
 
 UCLASS()
-class LOSTPLACE_API ACheckPoint : public APlayerStart, public ISaveInterface
+class LOSTPLACE_API ACheckPoint : public APlayerStart, public ISaveInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -26,15 +28,30 @@ public:
 	/*   End Save Interface   */
 
 	//当前检查点是否已经被激活，设置SaveGame表示该值将会被存储到存档文件中
-	UPROPERTY(BlueprintReadOnly, SaveGame)
-	bool bReached = false;
+	UPROPERTY(BlueprintReadWrite, SaveGame)
+	bool bReached = false; //是否已到达
 
+	UPROPERTY(EditAnywhere)
+	bool bBindOverlapCallback = true;
 	
 	//当玩家角色和检测点产生碰撞后，检查点被激活触发此函数
+	UFUNCTION(BlueprintCallable)
 	void HandleGlowEffects();
 protected:
 
 	virtual void BeginPlay() override;
+	
+	/*   高亮接口   */
+	virtual void HighlightActor_Implementation() override; //高亮
+	virtual void UnHighlightActor_Implementation() override; //取消高亮
+	virtual void SetMoveToLocation_Implementation(FVector& OutDestination) override; //设置移动目的地
+	/*  高亮接口结束   */
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> MoveToComponent;
+	
+	UPROPERTY(EditDefaultsOnly)
+	int32 CustomDepthStencilOverride = CUSTOM_DEPTH_TAN; //自定义深度覆盖
 	
 	/**
 	 * 球碰撞体和物体发生碰撞后的回调
@@ -55,16 +72,17 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void CheckpointReached(UMaterialInstanceDynamic* DynamicMaterialInstance);
 
-
-private:
-
 	//检查点显示的模型
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> CheckpointMesh;
-
 	//检查点模型使用的碰撞体
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
+
+private:
+
+
+
 
 
 };

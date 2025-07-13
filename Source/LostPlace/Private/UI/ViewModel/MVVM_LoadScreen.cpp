@@ -42,12 +42,18 @@ UMVVM_LoadSlot* UMVVM_LoadScreen::GetLoadSlotViewModelByIndex(int32 Index) const
 void UMVVM_LoadScreen::NewSlotButtonPressed(int32 Slot, const FString& EnterName)
 {
 	ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this));
+	if (!IsValid(LPGameMode))
+	{
+		GEngine->AddOnScreenDebugMessage(1,15.0f, FColor::Red, TEXT("请切换单人模式！"));
+		return;
+	}
+	
 	LoadSlots[Slot]->SetMapName(LPGameMode->DefaultMapName); //修改MVVM上存储的角色名称
 	LoadSlots[Slot]->SetPlayerName(EnterName); //修改MVVM上存储的角色名称
 	LoadSlots[Slot]->SetPlayerLevel(1);
 	LoadSlots[Slot]->LoadSlotStatus = Taken; //修改进入界面为加载界面
 	LoadSlots[Slot]->SetPlayerStartTag(LPGameMode->DefaultPlayerStartTag); //修改MVVM上存储的出生点标签
-
+	LoadSlots[Slot]->SetMapAssetName(LPGameMode->DefaultMap.ToSoftObjectPath().GetAssetName()); //修改MVVM上存储的地图资源名称
 	
 	LPGameMode->SaveSlotData(LoadSlots[Slot], Slot); //保存数据
 	LoadSlots[Slot]->InitializeSlot(); //调用初始化
@@ -109,6 +115,8 @@ void UMVVM_LoadScreen::LoadData()
 	//获取到加载存档界面的GameMode
 	ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this));
 
+	if (!IsValid(LPGameMode)) return;
+	
 	//遍历映射，获取对应存档
 	for(const TTuple<int32, UMVVM_LoadSlot*> Slot : LoadSlots)
 	{

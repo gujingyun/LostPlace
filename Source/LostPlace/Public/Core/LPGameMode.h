@@ -59,7 +59,7 @@ public:
 	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject);
 
 	//保存关卡中的状态到当前存档中
-	void SaveWorldState(UWorld* World) const;
+	void SaveWorldState(UWorld* World , const FString& DestinationMapAssetName = FString("")) const;
 	//从存档中加载当前关卡的状态
 	void LoadWorldState(UWorld* World) const;
 
@@ -85,8 +85,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FName DefaultPlayerStartTag;
 
+	//根据地图名称获取地图资源路径	
+	FString GetMapNameFromAssetName(const FString& MapAssetName) const;
+	
 	//覆写父类的选择PlayerStart函数，修改为可以通过Tag获取生成位置
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	/**
+	 * 角色死亡调用函数
+	 * @param DeadCharacter 玩家角色实例
+	 */
+	void PlayerDied(const ACharacter* DeadCharacter) const;
 
 protected:
 	virtual void BeginPlay() override;

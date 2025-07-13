@@ -20,12 +20,20 @@ ACheckPoint::ACheckPoint(const FObjectInitializer& ObjectInitializer): Super(Obj
 	CheckpointMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //设置查询并产生物理
 	CheckpointMesh->SetCollisionResponseToChannels(ECR_Block); //设置阻挡所有物体与其重叠
 
+	//设置检测点的自定义深度(描边)
+	CheckpointMesh->SetCustomDepthStencilValue(CustomDepthStencilOverride);
+	CheckpointMesh->MarkRenderStateDirty();
+	
 	//设置球碰撞体
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	Sphere->SetupAttachment(CheckpointMesh);
 	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly); //设置其只用作查询使用
 	Sphere->SetCollisionResponseToChannels(ECR_Ignore); //设置其忽略所有碰撞检测
 	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); //设置其与Pawn类型物体产生重叠事件
+
+	//点击移动到的位置
+	MoveToComponent = CreateDefaultSubobject<USceneComponent>("MoveToComponent");
+	MoveToComponent->SetupAttachment(GetRootComponent());
 }
 
 void ACheckPoint::LoadActor_Implementation()
@@ -40,8 +48,30 @@ void ACheckPoint::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//绑定重叠事件
-	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckPoint::OnSphereOverlap);
+	if (bBindOverlapCallback)
+	{
+		//绑定重叠事件
+		Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckPoint::OnSphereOverlap);
+	}
+
+}
+
+void ACheckPoint::HighlightActor_Implementation()
+{
+	if (!bReached)
+	{
+		CheckpointMesh->SetRenderCustomDepth(true);
+	}
+}
+
+void ACheckPoint::UnHighlightActor_Implementation()
+{
+	CheckpointMesh->SetRenderCustomDepth(false);
+}
+
+void ACheckPoint::SetMoveToLocation_Implementation(FVector& OutDestination)
+{
+	OutDestination = MoveToComponent->GetComponentLocation();
 }
 
 void ACheckPoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -52,8 +82,12 @@ void ACheckPoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		bReached = true;
 		if(ALPGameMode* LPGameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(this)))
 		{
+			const UWorld* World = GetWorld();
+			FString WorldName = World->GetMapName();
+			WorldName.RemoveFromStart(World->StreamingLevelsPrefix); //从关卡名称这里移除指定前缀，当前为移除通常用于标识流式加载的关卡文件前缀
+
 			//保存场景状态
-			LPGameMode->SaveWorldState(GetWorld());
+			LPGameMode->SaveWorldState(GetWorld(),WorldName);
 		}
 		//修改存档当的检测点
 		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);

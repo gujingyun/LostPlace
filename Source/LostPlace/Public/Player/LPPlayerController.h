@@ -10,15 +10,26 @@
 #include "GameFramework/PlayerController.h"
 #include "Interface/EnemyInterface.h"
 #include "LPPlayerController.generated.h"
+class IHighlightInterface;
 class AMagicCircle;
 class UNiagaraSystem;
 class UInputConfig;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-class IEnemyInterface;
 class UAbilitySystemComponentBase;
 class UDamageTextComponent;
+//鼠标拾取目标的状态枚举
+enum class ETargetingStatus : uint8
+{
+	//敌人
+	TargetingEnemy,
+	//鼠标拾取的目标非敌人
+	TargetingNonEnemy,
+	//无
+	NotTargeting
+};
+
 /**
  * 
  */
@@ -82,9 +93,11 @@ private:
 
 	void CursorTrace();//鼠标追踪
 
-	IEnemyInterface* LastActor;
-	IEnemyInterface* ThisActor;
+	TObjectPtr<AActor> LastActor;
+	TObjectPtr<AActor> ThisActor;
 	FHitResult CursorHit;
+	static  void HighlightActor(AActor* InActor);
+	static void UnHighlightActor(AActor* InActor);
 	
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
@@ -104,8 +117,10 @@ private:
 	FVector CachedDestination = FVector::ZeroVector; //存储鼠标点击的位置
 	float FollowTime = 0.f; // 用于查看按住了多久
 	bool bAutoRunning = false; //当前是否自动移动
-	bool bTargeting = false; //当前鼠标是否选中敌人
-
+	// bool bTargeting = false; //当前鼠标是否选中敌人
+	
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
+	
 	UPROPERTY(EditDefaultsOnly)
 	float ShortPressThreshold = 0.3f; //定义鼠标悬停多长时间内算点击事件
 

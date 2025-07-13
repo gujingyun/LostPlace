@@ -111,7 +111,9 @@ public:
 	
 	UFUNCTION()
 	virtual void OnRep_Burned();
-	
+
+	void SetCharacterClass(const ECharacterClass InClass) { CharacterClass = InClass; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -130,7 +132,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "战斗")
 	FName TailSocketName;
-	
+
+	UPROPERTY(BlueprintReadOnly)
 	bool bDead = false; //是否死亡
 
 	//眩晕标签变动后的回调
