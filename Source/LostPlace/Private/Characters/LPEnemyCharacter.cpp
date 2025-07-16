@@ -169,6 +169,7 @@ void ALPEnemyCharacter::Die(const FVector& DeathImpulse)
 {
 	SetLifeSpan(LifeSpan);
 	if (LPAIController)	LPAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("Dead"), true);
+	SpawnLoot();
 	Super::Die(DeathImpulse);
 }
 void ALPEnemyCharacter::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

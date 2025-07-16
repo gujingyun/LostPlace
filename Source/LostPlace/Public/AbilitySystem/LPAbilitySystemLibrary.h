@@ -6,6 +6,7 @@
 #include "Data/CharacterClassInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "LPAbilitySystemLibrary.generated.h"
+class ULootTiers;
 class ULoadScreenSaveGame;
 struct FDamageEffectParams;
 struct FWidgetControllerParams;
@@ -75,6 +76,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults")
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, int32 CharacterLevel);
 
+	/**
+	 * 获取生成的战利品数据资产，此数据会配置到GameMode上
+	 * @param WorldContextObject  一个世界场景的对象，用于获取当前所在的世界
+	 * @return 战利品数据
+	 *
+	 * @note 敌人死亡后，所需生成的战利品
+	 */
+	UFUNCTION(BlueprintCallable, Category="LPAbilitySystemLibrary|CharacterClassDefaults", meta=(DefaultToSelf = "WorldContextObject"))
+	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
 
 	/*
 	 * 影响上下文的获取器和设置器

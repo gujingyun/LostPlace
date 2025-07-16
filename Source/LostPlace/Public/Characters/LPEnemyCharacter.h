@@ -87,8 +87,11 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<ALPAIController> LPAIController;
-	
-	
+
+	//生成战利品
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnLoot();
+
 
 
 };

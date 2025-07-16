@@ -40,12 +40,12 @@ void ALPPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		if (IsValid(ThisActor))
 		{
 			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
-			bAutoRunning = false;
-			FollowTime = 0.f; //重置统计的时间
 		}else
 		{
 			TargetingStatus = ETargetingStatus::NotTargeting;
 		}
+		bAutoRunning = false;
+		FollowTime = 0.f; //重置统计的时间
 	}
 	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 }

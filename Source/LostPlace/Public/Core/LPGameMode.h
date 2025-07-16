@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "LPGameMode.generated.h"
 
+class ULootTiers;
 class ULoadScreenSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
@@ -26,7 +27,11 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category="能力信息")
 	TObjectPtr<UAbilityInfo> AbilityInfo;
-	
+
+	//战利品数据配置
+	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
+	TObjectPtr<ULootTiers> LootTiers;
+
 	/**
 	 * 创建新存档
 	 * @param LoadSlot 需要保存的视图模型示例

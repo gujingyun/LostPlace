@@ -451,6 +451,16 @@ int32 ULPAbilitySystemLibrary::GetXPRewardForClassAndLevel(const UObject* WorldC
 	return static_cast<int32>(XPReward);
 }
 
+ULootTiers* ULPAbilitySystemLibrary::GetLootTiers(const UObject* WorldContextObject)
+{
+	//获取到当前关卡的GameMode实例
+	const ALPGameMode* GameMode = Cast<ALPGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if(GameMode == nullptr) return nullptr;
+
+	//返回敌人战利品配置，需要设置到GameMode上
+	return  GameMode->LootTiers;
+}
+
 FGameplayEffectContextHandle ULPAbilitySystemLibrary::ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams)
 {
 	FLPGameplayTags GameplayTags = FLPGameplayTags::Get();
