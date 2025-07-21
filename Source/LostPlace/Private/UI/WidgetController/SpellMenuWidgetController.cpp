@@ -122,7 +122,7 @@ void USpellMenuWidgetController::EquipButtonPressed()
 	WaitForEquipDelegate.Broadcast(AbilityType);
 	bWaitingForEquipSelection = true;
 
-	const FGameplayTag SelectedStatus = GetLPASC()->GetStatusFromAbilityTag(SelectedAbility.Status);
+	const FGameplayTag SelectedStatus = GetLPASC()->GetStatusFromAbilityTag(SelectedAbility.Ability);
 
 	if (SelectedStatus.MatchesTag(FLPGameplayTags::Get().Abilities_Status_Equipped))
 	{

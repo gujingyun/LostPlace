@@ -38,14 +38,13 @@ void UAbilitySystemComponentBase::AddCharacterAbilitiesFormSaveData(ULoadScreenS
 		//被动技能的处理
 		else if(Data.AbilityType == FLPGameplayTags::Get().Abilities_Type_Passive)
 		{
+			GiveAbility(LoadedAbilitySpec); //只应用不激活
 			//确保技能已经装配
 			if(Data.AbilityStatus.MatchesTagExact(FLPGameplayTags::Get().Abilities_Status_Equipped))
 			{
-				GiveAbilityAndActivateOnce(LoadedAbilitySpec); //应用技能并激活
-			}
-			else
-			{
-				GiveAbility(LoadedAbilitySpec); //只应用不激活
+				
+				// GiveAbilityAndActivateOnce(LoadedAbilitySpec); //应用技能并激活
+				TryActivateAbility(LoadedAbilitySpec.Handle);
 			}
 		}
 	}
@@ -302,8 +301,7 @@ void UAbilitySystemComponentBase::UpdateAbilityStatuses(int32 Level)
 	}
 }
 
-void UAbilitySystemComponentBase::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag,
-	const FGameplayTag& Slot)
+void UAbilitySystemComponentBase::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& Slot)
 {
 	if(FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
 	{
@@ -323,18 +321,21 @@ void UAbilitySystemComponentBase::ServerEquipAbility_Implementation(const FGamep
 					//技能槽位装配相同的技能，直接返回，不做额外的处理
 					if(AbilityTag.MatchesTagExact(GetAbilityTagFromSpec(*SpecWithSlot)))
 					{
-						ClientEquipAbility(AbilityTag, Status, Slot, PrevSlot);
+						ClientEquipAbility(AbilityTag, GameplayTags.Abilities_Status_Equipped, Slot, PrevSlot);
 						return;
 					}
 
+					// ClearAbilitiesOfSlot(Slot); //清除目标插槽装配的技能
 					//如果是被动技能，我们需要先将技能取消执行
 					if(IsPassiveAbility(*SpecWithSlot))
 					{
+						SpecWithSlot->GetDynamicSpecSourceTags().RemoveTag(GetStatusFromSpec(*SpecWithSlot));
+						SpecWithSlot->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
 						MulticastActivatePassiveEffect(GetAbilityTagFromSpec(*SpecWithSlot),false);
 						DeactivatePassiveAbility.Broadcast(GetAbilityTagFromSpec(*SpecWithSlot));
 					}
-					// ClearSlot(SpecWithSlot);
-					ClearAbilitiesOfSlot(Slot); //清除目标插槽装配的技能
+					ClearSlot(SpecWithSlot);
+					
 				}
 			}
 

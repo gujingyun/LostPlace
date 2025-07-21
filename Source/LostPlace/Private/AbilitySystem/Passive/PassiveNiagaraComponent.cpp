@@ -47,7 +47,10 @@ void UPassiveNiagaraComponent::OnPassiveActivate(const FGameplayTag& AbilityTag,
 		if(bActivate)
 		{
 			//不需要重复激活
-			if(!IsActive()) Activate();
+			if(!IsActive())
+			{
+				Activate();
+			}
 		}
 		else
 		{
