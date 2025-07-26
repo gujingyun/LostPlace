@@ -8,7 +8,7 @@ public class LostPlace : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] {  "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","UMG","AIModule", "OnlineSubsystem","OnlineSubsystemSteam","OnlineSubsystemUtils","GameplayAbilities"});
+		PublicDependencyModuleNames.AddRange(new string[] {  "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","UMG","AIModule", "OnlineSubsystem","OnlineSubsystemSteam","OnlineSubsystemUtils","GameplayAbilities", "Inventory" });
 		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayTags", "GameplayTasks", "NavigationSystem", "Niagara" });
 
 	}

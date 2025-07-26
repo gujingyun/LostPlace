@@ -25,7 +25,7 @@ void AEffectActorBase::BeginPlay()
 	CalculatedRotation = GetActorRotation();
 }
 
-void AEffectActorBase::OnOverlap(AActor* TargetActor)
+void AEffectActorBase::OnOverlap_Implementation(AActor* TargetActor)
 {
 	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) return;
 	
@@ -49,7 +49,8 @@ void AEffectActorBase::OnOverlap(AActor* TargetActor)
 	}
 }
 
-void AEffectActorBase::OnEndOverlap(AActor* TargetActor)
+
+void AEffectActorBase::OnEndOverlap_Implementation(AActor* TargetActor)
 {
 	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) return;
 	//添加效果

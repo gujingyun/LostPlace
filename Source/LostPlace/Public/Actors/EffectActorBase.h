@@ -79,13 +79,15 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ApplyEffectToTarget(AActor* TargetActor,TSubclassOf<UGameplayEffect> GameplayEffectClass);
 	//在重叠开始时处理效果的添加删除逻辑
-	UFUNCTION(BlueprintCallable) 
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable) 
 	void OnOverlap(AActor* TargetActor);
-
+	virtual void OnOverlap_Implementation(AActor* TargetActor);
+	
 	//在重叠结束时处理效果的添加删除逻辑
-	UFUNCTION(BlueprintCallable) 
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable) 
 	void OnEndOverlap(AActor* TargetActor);
-
+	virtual void OnEndOverlap_Implementation(AActor* TargetActor);
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
 	bool bDestroyOnEffectApplication = false;
 

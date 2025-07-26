@@ -9,6 +9,8 @@
 #include "Components/SplineComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Interface/EnemyInterface.h"
+#include "Player/Inv_PlayerController.h"
+#include "Player/Inv_PlayerController.h"
 #include "LPPlayerController.generated.h"
 class IHighlightInterface;
 class AMagicCircle;
@@ -34,7 +36,7 @@ enum class ETargetingStatus : uint8
  * 
  */
 UCLASS()
-class LOSTPLACE_API ALPPlayerController : public APlayerController
+class LOSTPLACE_API ALPPlayerController : public AInv_PlayerController
 {
 	GENERATED_BODY()
 public:
@@ -50,7 +52,10 @@ public:
 
 	//隐藏魔法光圈
 	UFUNCTION(BlueprintCallable)
-	void HideMagicCircle() const; 
+	void HideMagicCircle() const;
+
+
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -93,8 +98,12 @@ private:
 
 	void CursorTrace();//鼠标追踪
 
-	TObjectPtr<AActor> LastActor;
-	TObjectPtr<AActor> ThisActor;
+	// TObjectPtr<AActor> LastActor;
+	// TObjectPtr<AActor> ThisActor;
+	
+	TWeakObjectPtr<AActor> ThisActor;
+	TWeakObjectPtr<AActor> LastActor;
+	
 	FHitResult CursorHit;
 	static  void HighlightActor(AActor* InActor);
 	static void UnHighlightActor(AActor* InActor);

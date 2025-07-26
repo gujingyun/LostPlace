@@ -37,7 +37,9 @@ void ALPPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	}
 	if(InputTag.MatchesTagExact(FLPGameplayTags::Get().InputTag_LMB))
 	{
-		if (IsValid(ThisActor))
+		
+		// if (IsValid(ThisActor))
+		if (ThisActor.IsValid())
 		{
 			TargetingStatus = ThisActor->Implements<UEnemyInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonEnemy;
 		}else
@@ -68,9 +70,10 @@ void ALPPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
-	if (IsValid(ThisActor) && ThisActor->Implements<UHighlightInterface>())
+	// if (ThisActor.IsValid())
+	if (ThisActor.IsValid() && ThisActor->Implements<UHighlightInterface>())
 	{
-		IHighlightInterface::Execute_SetMoveToLocation(ThisActor, CachedDestination);
+		IHighlightInterface::Execute_SetMoveToLocation(ThisActor.Get(), CachedDestination);
 	}
 	else if (GetASC() && !GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_InputPressed))
 	{
@@ -161,7 +164,7 @@ void ALPPlayerController::BeginPlay()
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());//多人游戏中，每个玩家的客户端都有一个本地玩家和多个非本地玩家，假如有三个玩家，除了本地玩家，其他玩家的子系统都是空的
 	if(Subsystem)//检查子系统是否存在
 	{
-		Subsystem->AddMappingContext(CharacterContext, 0); //可以存在多个操作映射，根据优先级触发
+		Subsystem->AddMappingContext(CharacterContext, 1); //可以存在多个操作映射，根据优先级触发
 	} 
 	
 
@@ -191,6 +194,8 @@ void ALPPlayerController::SetupInputComponent()
 		
 		EnhancedInputComponent ->BindAbilityAction(InputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHold);
 		
+		// EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Started, this, &ThisClass::PrimaryInteract);
+		// EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Started, this, &ThisClass::ToggleInventory);
 	}
 	else
 	{
@@ -250,6 +255,8 @@ void ALPPlayerController::HideMagicCircle() const
 {
 	if(IsValid(MagicCircle)) MagicCircle->Destroy();
 }
+
+
 
 void ALPPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter,bool bBlockedHit,bool bCriticalHit)
 {
@@ -316,8 +323,8 @@ void ALPPlayerController::CursorTrace()
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FLPGameplayTags::Get().Player_Block_CursorTrace))
 	{
 
-		UnHighlightActor(LastActor);
-		UnHighlightActor(ThisActor);
+		UnHighlightActor(LastActor.Get());
+		UnHighlightActor(ThisActor.Get());
 		LastActor = nullptr;
 		ThisActor = nullptr;
 		return;
@@ -344,10 +351,10 @@ void ALPPlayerController::CursorTrace()
 	 * 5. LastActor is valid   ThisActor is valid LastActor == ThisActor 不需要任何操作
 	 */
 
-	if (LastActor != ThisActor)
+	if (LastActor.Get() != ThisActor.Get())
 	{
-		UnHighlightActor(LastActor);
-		HighlightActor(ThisActor);
+		UnHighlightActor(LastActor.Get());
+		HighlightActor(ThisActor.Get());
 	}
 	// if(LastActor == nullptr)
 	// {
