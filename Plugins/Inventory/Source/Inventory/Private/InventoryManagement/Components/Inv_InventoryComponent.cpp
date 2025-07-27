@@ -130,7 +130,9 @@ void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryIt
 
 	if (FInv_ConsumableFragment* ConsumableFragment = Item->GetItemManifestMutable().GetFragmentOfTypeMutable<FInv_ConsumableFragment>())
 	{
-		ConsumableFragment->OnConsume(OwningController.Get());
+		TSubclassOf<AActor> PickupActorClass = Item->GetItemManifest().GetPickupActorClass();
+		AActor* SpawnedActor = this->GetWorld()->SpawnActor<AActor>(PickupActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		ConsumableFragment->OnConsume(OwningController.Get(), SpawnedActor);
 	}
 }
 

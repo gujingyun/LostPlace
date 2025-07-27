@@ -2,6 +2,7 @@
 #include "Engine/Engine.h"
 #include "Components/SkeletalMeshComponent.h" 
 #include "EquipmentManagement/EquipActor/Inv_EquipActor.h"
+#include "Player/Inv_PlayerController.h"
 #include "Widgets/Composite/Inv_CompositeBase.h"
 #include "Widgets/Composite/Inv_Leaf_Image.h"
 #include "Widgets/Composite/Inv_Leaf_LabeledValue.h"
@@ -70,12 +71,12 @@ void FInv_LabeledNumberFragment::Manifest()
 }
 
 
-void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
+void FInv_ConsumableFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
 {
 	for (auto& Modifier : ConsumeModifiers)
 	{
 		auto& ModRef = Modifier.GetMutable();
-		ModRef.OnConsume(PC);
+		ModRef.OnConsume(PC, SourceActor);
 	}
 }
 
@@ -98,7 +99,14 @@ void FInv_ConsumableFragment::Manifest()
 		ModRef.Manifest();
 	}
 }
-void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
+void FInv_ConsumeEffect::OnConsume(APlayerController* PC, AActor* SourceActor)
+{
+	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
+	{
+		PlayerController->OnConsume.Broadcast(SourceActor);
+	}
+}
+void FInv_HealthPotionFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
 {
 	// Get a stats component from the PC or the PC->GetPawn()
 	// or get the Ability System Component and apply a Gameplay Effect
@@ -112,7 +120,7 @@ void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
 			GetValue()));
 }
 
-void FInv_ManaPotionFragment::OnConsume(APlayerController* PC)
+void FInv_ManaPotionFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
 {
 	// Replenish mana however you wish
 
@@ -125,24 +133,20 @@ void FInv_ManaPotionFragment::OnConsume(APlayerController* PC)
 }
 
 
-void FInv_StrengthModifier::OnEquip(APlayerController* PC)
+void FInv_AttributeModifier::OnEquip(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Green,
-		FString::Printf(TEXT("Strength increased by: %f"),
-			GetValue()));
+	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
+	{
+		PlayerController->OnEquipped.Broadcast(EquipmentModifierTag, GetValue());
+	}
 }
 
-void FInv_StrengthModifier::OnUnequip(APlayerController* PC)
+void FInv_AttributeModifier::OnUnequip(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Red,
-		FString::Printf(TEXT("Item unequipped. Strength decreased by: %f"),
-			GetValue()));
+	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
+	{
+		PlayerController->OnUnequip.Broadcast(EquipmentModifierTag, GetValue());
+	}
 }
 void FInv_ArmorModifier::OnEquip(APlayerController* PC)
 {

@@ -71,6 +71,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag); //服务器升级属性函数
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateAttribute(const FGameplayTag& AttributeTag,float Value); //更新属性值
+
+	UFUNCTION(Server, Reliable)
+	void ServerUpdateAttribute(const FGameplayTag& AttributeTag,float Value); //服务器更新属性值函数
+
+	
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag); //通过技能标签获取技能实例
 
 	void UpdateAbilityStatuses(int32 Level); //根据角色等级更新技能数据状态

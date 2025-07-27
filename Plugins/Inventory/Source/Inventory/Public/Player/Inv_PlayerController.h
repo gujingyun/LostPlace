@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/PlayerController.h"
 #include "Inv_PlayerController.generated.h"
 
@@ -10,6 +11,10 @@ class UInv_InventoryComponent;
 class UInv_HUDWidget;
 class UInputMappingContext;
 class UInputAction;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipped, FGameplayTag, Tag, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUnequip, FGameplayTag, Tag, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConsume, AActor*, ConsumeActor);
 
 UCLASS()
 class INVENTORY_API AInv_PlayerController : public APlayerController
@@ -27,7 +32,14 @@ public:
 	//
 	// UFUNCTION(BlueprintCallable)
 	// void ShowPickupMessage();
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnEquipped OnEquipped;
 
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnUnequip OnUnequip;
+	
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnConsume OnConsume;
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -48,6 +60,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UInv_HUDWidget> HUDWidget;
+	
 
 	TWeakObjectPtr<AActor> ThisItem;
 	TWeakObjectPtr<AActor> LastItem;

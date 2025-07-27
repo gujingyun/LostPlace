@@ -37,6 +37,9 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	
+	UFUNCTION(BlueprintCallable) 
+	void OnConsume(AActor* TargetActor);
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -82,11 +85,11 @@ protected:
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable) 
 	void OnOverlap(AActor* TargetActor);
 	virtual void OnOverlap_Implementation(AActor* TargetActor);
-	
+
 	//在重叠结束时处理效果的添加删除逻辑
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable) 
 	void OnEndOverlap(AActor* TargetActor);
-	virtual void OnEndOverlap_Implementation(AActor* TargetActor);
+	virtual void OnEndOverlapwd_Implementation(AActor* TargetActor);
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
 	bool bDestroyOnEffectApplication = false;

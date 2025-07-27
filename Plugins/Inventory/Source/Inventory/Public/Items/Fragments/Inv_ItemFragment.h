@@ -154,8 +154,8 @@ USTRUCT(BlueprintType)
 struct FInv_ConsumeModifier : public FInv_LabeledNumberFragment
 {
 	GENERATED_BODY()
-
-	virtual void OnConsume(APlayerController* PC) {}
+	
+	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) {}
 };
 
 USTRUCT(BlueprintType)
@@ -163,7 +163,7 @@ struct FInv_ConsumableFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
 	
-	virtual void OnConsume(APlayerController* PC);
+	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr);
 	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
 	virtual void Manifest() override;
 private:
@@ -171,21 +171,28 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct))
 	TArray<TInstancedStruct<FInv_ConsumeModifier>> ConsumeModifiers;
 };
+USTRUCT(BlueprintType)
+struct FInv_ConsumeEffect : public FInv_ConsumeModifier
+{
+	GENERATED_BODY()
+	
+	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
+};
 
 USTRUCT(BlueprintType)
 struct FInv_HealthPotionFragment : public FInv_ConsumeModifier
 {
 	GENERATED_BODY()
-	
-	virtual void OnConsume(APlayerController* PC) override;
+
+	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
 };
 
 USTRUCT(BlueprintType)
 struct FInv_ManaPotionFragment : public FInv_ConsumeModifier
 {
 	GENERATED_BODY()
-
-	virtual void OnConsume(APlayerController* PC) override;
+	
+	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
 };
 
 // Equipment
@@ -200,10 +207,12 @@ struct FInv_EquipModifier : public FInv_LabeledNumberFragment
 };
 
 USTRUCT(BlueprintType)
-struct FInv_StrengthModifier : public FInv_EquipModifier
+struct FInv_AttributeModifier : public FInv_EquipModifier
 {
 	GENERATED_BODY()
-
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FGameplayTag EquipmentModifierTag = FGameplayTag::EmptyTag;
+	
 	virtual void OnEquip(APlayerController* PC) override;
 	virtual void OnUnequip(APlayerController* PC) override;
 };

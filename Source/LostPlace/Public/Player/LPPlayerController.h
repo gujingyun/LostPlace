@@ -59,6 +59,13 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	UFUNCTION()
+	void Consume(AActor* ConsumeActor);
+	
+	UFUNCTION()
+	void Equipped( FGameplayTag Tag, float Value);
+	UFUNCTION()
+	void Unequip(FGameplayTag Tag, float Value);
 	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
 private:

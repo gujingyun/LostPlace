@@ -49,6 +49,11 @@ void AEffectActorBase::OnOverlap_Implementation(AActor* TargetActor)
 	}
 }
 
+void AEffectActorBase::OnConsume(AActor* TargetActor)
+{
+	ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
+}
+
 
 void AEffectActorBase::OnEndOverlap_Implementation(AActor* TargetActor)
 {

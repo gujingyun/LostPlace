@@ -33,7 +33,8 @@ struct INVENTORY_API FInv_ItemManifest
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	FGameplayTag GetItemType() const { return ItemType; }
 	void AssimilateInventoryFragments(UInv_CompositeBase* Composite) const;
-	
+	TSubclassOf<AActor> GetPickupActorClass() const { return PickupActorClass; }
+
 	template<typename T> requires std::derived_from<T, FInv_ItemFragment>
 	const T* GetFragmentOfTypeWithTag(const FGameplayTag& FragmentTag) const;
 

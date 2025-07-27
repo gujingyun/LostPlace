@@ -36,7 +36,6 @@ void FInv_ItemManifest::SpawnPickupActor(const UObject* WorldContextObject, cons
 
 	AActor* SpawnedActor = WorldContextObject->GetWorld()->SpawnActor<AActor>(PickupActorClass, SpawnLocation, SpawnRotation);
 	if (!IsValid(SpawnedActor)) return;
-
 	// Set the item manifest, item category, item type, etc.
 	UInv_ItemComponent* ItemComp = SpawnedActor->FindComponentByClass<UInv_ItemComponent>();
 	check(ItemComp);

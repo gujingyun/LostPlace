@@ -262,6 +262,24 @@ void UAbilitySystemComponentBase::UpgradeAttribute(const FGameplayTag& Attribute
 	}
 }
 
+void UAbilitySystemComponentBase::UpdateAttribute(const FGameplayTag& AttributeTag, float Value)
+{
+	//判断Avatar是否基础角色接口
+	if(GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		ServerUpdateAttribute(AttributeTag,Value); //调用服务器更新属性值
+	}
+}
+
+void UAbilitySystemComponentBase::ServerUpdateAttribute_Implementation(const FGameplayTag& AttributeTag, float Value)
+{
+	FGameplayEventData Payload; //创建一个事件数据
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = Value;
+	//向自身发送事件，通过被动技能接收属性加点
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
+}
+
 FGameplayAbilitySpec* UAbilitySystemComponentBase::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
 {
 	FScopedAbilityListLock ActiveScopeLoc(*this); //域锁
