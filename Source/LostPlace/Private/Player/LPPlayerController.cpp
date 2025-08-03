@@ -177,33 +177,6 @@ void ALPPlayerController::BeginPlay()
 	InputModeData.SetHideCursorDuringCapture(false); //鼠标被捕获时是否隐藏
 	SetInputMode(InputModeData); //设置给控制器
 
-	OnEquipped.AddDynamic(this,&ThisClass::Equipped);
-	OnUnequip.AddDynamic(this,&ThisClass::Unequip);
-	OnConsume.AddDynamic(this,&ThisClass::Consume);
-}
-void ALPPlayerController::Consume(AActor* ConsumeActor)
-{
-	if (AEffectActorBase* EffectActor = Cast<AEffectActorBase>(ConsumeActor))
-	{
-		if (APawn* ControlledPawn = GetPawn())
-		{
-			EffectActor->OnConsume(ControlledPawn);
-		}
-	}
-}
-void ALPPlayerController::Equipped(FGameplayTag Tag, float Value)
-{
-	if (GetASC())
-	{
-		GetASC()->UpdateAttribute(Tag, Value);
-	}
-}
-void ALPPlayerController::Unequip(FGameplayTag Tag, float Value)
-{
-	if (GetASC())
-	{
-		GetASC()->UpdateAttribute(Tag, -Value);
-	}
 }
 //////////////////////////////////////////////////////////////////////////
 // Input

@@ -89,7 +89,7 @@ protected:
 	//在重叠结束时处理效果的添加删除逻辑
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable) 
 	void OnEndOverlap(AActor* TargetActor);
-	virtual void OnEndOverlapwd_Implementation(AActor* TargetActor);
+	virtual void OnEndOverlap_Implementation(AActor* TargetActor);
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Applied Effects")
 	bool bDestroyOnEffectApplication = false;

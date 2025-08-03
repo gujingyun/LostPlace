@@ -7,6 +7,10 @@
 #include "Widgets/Composite/Inv_Leaf_Image.h"
 #include "Widgets/Composite/Inv_Leaf_LabeledValue.h"
 #include "Widgets/Composite/Inv_Leaf_Text.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "GameplayEffect.h"
+#include "GameplayEffectUIData.h"
 
 void FInv_InventoryItemFragment::Assimilate(UInv_CompositeBase* Composite) const
 {
@@ -70,13 +74,108 @@ void FInv_LabeledNumberFragment::Manifest()
 	bRandomizeOnManifest = false;
 }
 
+void FInv_ConsumeModifier::OnConsume(APlayerController* PC)
+{
+	ApplyGameplayEffectToTarget(PC);
+	
+	// 显示消耗品调试信息
+	if (IsValid(GameplayEffectClass))
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			3.f,
+			FColor::Cyan,
+			FString::Printf(TEXT("Consumable effect applied: %s (Value: %f)"),
+				*GameplayEffectClass->GetName(), GetValue()));
+	}
+}
 
-void FInv_ConsumableFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
+void FInv_ConsumeModifier::ApplyGameplayEffectToTarget(APlayerController* PC) const
+{
+	if (!IsValid(GameplayEffectClass) || !IsValid(PC))
+	{
+		return;
+	}
+	
+	// 获取玩家角色
+	AActor* TargetActor = PC->GetPawn();
+	if (!IsValid(TargetActor))
+	{
+		return;
+	}
+	
+	// 获取AbilitySystemComponent
+	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	if (!IsValid(TargetASC))
+	{
+		return;
+	}
+	
+	// 创建GameplayEffect上下文
+	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(TargetActor);
+	
+	// 创建GameplayEffect规格
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.0f, EffectContextHandle);
+	
+	// 应用GameplayEffect
+	TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+}
+
+void FInv_ConsumeModifier::Assimilate(UInv_CompositeBase* Composite) const
+{
+	FInv_LabeledNumberFragment::Assimilate(Composite);
+	
+	// 如果有GameplayEffect，尝试显示其描述
+	if (IsValid(GameplayEffectClass))
+	{
+		FText EffectDescription = GetEffectDescription();
+		if (!EffectDescription.IsEmpty())
+		{
+			// 更新标签为效果描述
+			// 注意：这里可能需要根据实际的UI结构进行调整
+		}
+	}
+}
+
+FText FInv_ConsumeModifier::GetEffectDescription() const
+{
+	if (!IsValid(GameplayEffectClass))
+	{
+		return FText::GetEmpty();
+	}
+	
+	// 获取GameplayEffect的默认对象来获取其属性
+	if (const UGameplayEffect* DefaultEffect = GameplayEffectClass->GetDefaultObject<UGameplayEffect>())
+	{
+		// 使用新的GameplayEffectComponent方式获取UI数据 (UE 5.3+)
+		if (const class UGameplayEffectUIData* UIComponent = DefaultEffect->FindComponent<class UGameplayEffectUIData>())
+		{
+			// 从UIComponent获取描述信息
+			// 注意：这里需要根据UGameplayEffectUIData的具体实现来获取描述文本
+			// 如果UIComponent有Description属性，可以直接使用
+			return FText::FromString("GameplayEffect UI Description"); // 这里需要根据实际UIComponent的属性调整
+		}
+		
+		// 如果没有UI组件，尝试从效果名称生成描述
+		FString EffectName = GameplayEffectClass->GetName();
+		// 移除类名前缀（如"GE_"）
+		if (EffectName.StartsWith(TEXT("GE_")))
+		{
+			EffectName = EffectName.RightChop(3);
+		}
+		return FText::FromString(EffectName);
+	}
+	
+	return FText::GetEmpty();
+}
+
+void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
 {
 	for (auto& Modifier : ConsumeModifiers)
 	{
 		auto& ModRef = Modifier.GetMutable();
-		ModRef.OnConsume(PC, SourceActor);
+		ModRef.OnConsume(PC);
 	}
 }
 
@@ -99,94 +198,98 @@ void FInv_ConsumableFragment::Manifest()
 		ModRef.Manifest();
 	}
 }
-void FInv_ConsumeEffect::OnConsume(APlayerController* PC, AActor* SourceActor)
+
+
+void FInv_EquipModifier::OnEquip(APlayerController* PC)
 {
-	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
+	ApplyGameplayEffectToTarget(PC);
+	
+	// 显示装备调试信息
+	if (IsValid(GameplayEffectClass))
 	{
-		PlayerController->OnConsume.Broadcast(SourceActor);
-	}
-}
-void FInv_HealthPotionFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
-{
-	// Get a stats component from the PC or the PC->GetPawn()
-	// or get the Ability System Component and apply a Gameplay Effect
-	// or call an interface function for Healing()
-
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Green,
-		FString::Printf(TEXT("Health Potion consumed! Healing by: %f"),
-			GetValue()));
-}
-
-void FInv_ManaPotionFragment::OnConsume(APlayerController* PC, AActor* SourceActor)
-{
-	// Replenish mana however you wish
-
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Blue,
-		FString::Printf(TEXT("Mana Potion consumed! Mana replenished by: %f"),
-			GetValue()));
-}
-
-
-void FInv_AttributeModifier::OnEquip(APlayerController* PC)
-{
-	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
-	{
-		PlayerController->OnEquipped.Broadcast(EquipmentModifierTag, GetValue());
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			3.f,
+			FColor::Green,
+			FString::Printf(TEXT("Equipment effect applied: %s (Value: %f)"),
+				*GameplayEffectClass->GetName(), GetValue()));
 	}
 }
 
-void FInv_AttributeModifier::OnUnequip(APlayerController* PC)
+void FInv_EquipModifier::OnUnequip(APlayerController* PC)
 {
-	if (AInv_PlayerController* PlayerController = Cast<AInv_PlayerController>(PC))
+	RemoveGameplayEffectFromTarget(PC);
+	
+	// 显示卸载调试信息
+	if (IsValid(GameplayEffectClass))
 	{
-		PlayerController->OnUnequip.Broadcast(EquipmentModifierTag, GetValue());
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			3.f,
+			FColor::Red,
+			FString::Printf(TEXT("Equipment effect removed: %s (Value: %f)"),
+				*GameplayEffectClass->GetName(), GetValue()));
 	}
 }
-void FInv_ArmorModifier::OnEquip(APlayerController* PC)
+
+void FInv_EquipModifier::ApplyGameplayEffectToTarget(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Green,
-		FString::Printf(TEXT("Item equipped. Armor increased by: %f"),
-			GetValue()));
+	if (!IsValid(GameplayEffectClass) || !IsValid(PC))
+	{
+		return;
+	}
+	
+	// 获取玩家角色
+	AActor* TargetActor = PC->GetPawn();
+	if (!IsValid(TargetActor))
+	{
+		return;
+	}
+	
+	// 获取AbilitySystemComponent
+	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	if (!IsValid(TargetASC))
+	{
+		return;
+	}
+	
+	// 创建GameplayEffect上下文
+	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(TargetActor);
+	
+	// 创建GameplayEffect规格
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.0f, EffectContextHandle);
+	
+	// 应用GameplayEffect并保存句柄
+	ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 }
 
-void FInv_ArmorModifier::OnUnequip(APlayerController* PC)
+void FInv_EquipModifier::RemoveGameplayEffectFromTarget(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Red,
-		FString::Printf(TEXT("Item unequipped. Armor decreased by: %f"),
-			GetValue()));
+	if (!IsValid(PC) || !ActiveEffectHandle.IsValid())
+	{
+		return;
+	}
+	
+	// 获取玩家角色
+	AActor* TargetActor = PC->GetPawn();
+	if (!IsValid(TargetActor))
+	{
+		return;
+	}
+	
+	// 获取AbilitySystemComponent
+	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	if (!IsValid(TargetASC))
+	{
+		return;
+	}
+	
+	// 移除GameplayEffect
+	TargetASC->RemoveActiveGameplayEffect(ActiveEffectHandle);
+	ActiveEffectHandle = FActiveGameplayEffectHandle();
 }
 
-void FInv_DamageModifier::OnEquip(APlayerController* PC)
-{
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Green,
-		FString::Printf(TEXT("Item equipped. Damage increased by: %f"),
-			GetValue()));
-}
-
-void FInv_DamageModifier::OnUnequip(APlayerController* PC)
-{
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Red,
-		FString::Printf(TEXT("Item equipped. Damage increased by: %f"),
-			GetValue()));
-}
 
 void FInv_EquipmentFragment::OnEquip(APlayerController* PC)
 {

@@ -6,8 +6,10 @@
 #include "UObject/Class.h"
 #include "Engine/Texture2D.h"
 #include "UObject/ObjectPtr.h"
+#include "GameplayEffectTypes.h"
 #include "Inv_ItemFragment.generated.h"
 class APlayerController;
+class UGameplayEffect;
 
 
 USTRUCT(BlueprintType)
@@ -155,7 +157,24 @@ struct FInv_ConsumeModifier : public FInv_LabeledNumberFragment
 {
 	GENERATED_BODY()
 	
-	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) {}
+	virtual void OnConsume(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	
+	// 获取要应用的GameplayEffect类
+	TSubclassOf<UGameplayEffect> GetGameplayEffectClass() const { return GameplayEffectClass; }
+	void SetGameplayEffectClass(TSubclassOf<UGameplayEffect> EffectClass) { GameplayEffectClass = EffectClass; }
+	
+	// 从 GameplayEffect 获取描述文本
+	FText GetEffectDescription() const;
+	
+protected:
+	// 应用GameplayEffect到目标
+	void ApplyGameplayEffectToTarget(APlayerController* PC) const;
+	
+private:
+	// 消耗品的GameplayEffect类
+	UPROPERTY(EditAnywhere, Category = "Consume Effect")
+	TSubclassOf<UGameplayEffect> GameplayEffectClass = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -163,7 +182,7 @@ struct FInv_ConsumableFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
 	
-	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr);
+	virtual void OnConsume(APlayerController* PC);
 	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
 	virtual void Manifest() override;
 private:
@@ -171,29 +190,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct))
 	TArray<TInstancedStruct<FInv_ConsumeModifier>> ConsumeModifiers;
 };
-USTRUCT(BlueprintType)
-struct FInv_ConsumeEffect : public FInv_ConsumeModifier
-{
-	GENERATED_BODY()
-	
-	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
-};
 
-USTRUCT(BlueprintType)
-struct FInv_HealthPotionFragment : public FInv_ConsumeModifier
-{
-	GENERATED_BODY()
-
-	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
-};
-
-USTRUCT(BlueprintType)
-struct FInv_ManaPotionFragment : public FInv_ConsumeModifier
-{
-	GENERATED_BODY()
-	
-	virtual void OnConsume(APlayerController* PC, AActor* SourceActor = nullptr) override;
-};
 
 // Equipment
 
@@ -202,37 +199,28 @@ struct FInv_EquipModifier : public FInv_LabeledNumberFragment
 {
 	GENERATED_BODY()
 
-	virtual void OnEquip(APlayerController* PC) {}
-	virtual void OnUnequip(APlayerController* PC) {}
-};
-
-USTRUCT(BlueprintType)
-struct FInv_AttributeModifier : public FInv_EquipModifier
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	FGameplayTag EquipmentModifierTag = FGameplayTag::EmptyTag;
+	virtual void OnEquip(APlayerController* PC);
+	virtual void OnUnequip(APlayerController* PC);
 	
-	virtual void OnEquip(APlayerController* PC) override;
-	virtual void OnUnequip(APlayerController* PC) override;
+	// 获取要应用的GameplayEffect类
+	TSubclassOf<UGameplayEffect> GetGameplayEffectClass() const { return GameplayEffectClass; }
+	void SetGameplayEffectClass(TSubclassOf<UGameplayEffect> EffectClass) { GameplayEffectClass = EffectClass; }
+	
+protected:
+	// 应用GameplayEffect到目标
+	void ApplyGameplayEffectToTarget(APlayerController* PC);
+	// 移除GameplayEffect
+	void RemoveGameplayEffectFromTarget(APlayerController* PC);
+	
+private:
+	// 装备的GameplayEffect类
+	UPROPERTY(EditAnywhere, Category = "Equipment Effect")
+	TSubclassOf<UGameplayEffect> GameplayEffectClass = nullptr;
+	
+	// 存储应用的GameplayEffect句柄，用于卸载时移除
+	FActiveGameplayEffectHandle ActiveEffectHandle;
 };
-USTRUCT(BlueprintType)
-struct FInv_ArmorModifier : public FInv_EquipModifier
-{
-	GENERATED_BODY()
 
-	virtual void OnEquip(APlayerController* PC) override;
-	virtual void OnUnequip(APlayerController* PC) override;
-};
-
-USTRUCT(BlueprintType)
-struct FInv_DamageModifier : public FInv_EquipModifier
-{
-	GENERATED_BODY()
-
-	virtual void OnEquip(APlayerController* PC) override;
-	virtual void OnUnequip(APlayerController* PC) override;
-};
 
 class AInv_EquipActor;
 USTRUCT(BlueprintType)
